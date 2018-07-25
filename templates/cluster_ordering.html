@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<body>
+	{% extends "layout.html" %}
+	{% block content %}
+	<div class='standardDiv'>
+		<h1></h1>
+		<p>This method uses hierarchical clustering to cluster data points and then builds a spanning tree based on the hierarchical clusters.
+		This method attempts to conserve the groupings of the data points while reordering them. These groupings are the ones 
+		significant to the underlying biological process</p>
+		<h4>Cluster Spanning Tree Ordering</h4>
+		<form method=post>
+      		<p>
+        	<input type=submit value="Use method on uploaded data">
+        	</p>
+    	</form>
+	</div>
+	{% endblock %}
+</body>
+</html>

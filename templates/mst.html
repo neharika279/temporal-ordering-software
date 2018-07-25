@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<body>
+	{% extends "layout.html" %}
+	{% block content %}
+	<div class='standardDiv'>
+		<h1>Reconstructing the temporal ordering of biological samples</h1>
+		<p>This algorithm reconstructs the order of the input microarray gene data
+			This is done by construction of a minimum spanning tree that is based on an nxn euclidean distance matrix where n is the number of samples.
+			The matrix gives the Euclidean distances between gene expressions for each pair of samples.
+			Upload a data file containing gene expressions of n number of samples to see the temporal ordering.</p>
+		<form method=post>
+      		<p>
+        	<input type=submit value="Use method on uploaded data">
+        	</p>
+    	</form>
+	</div>
+	{% endblock %}
+</body>
+</html>

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <script type="text/javascript" src="{{url_for('static',filename='jquery-3.3.1.min.js')}}"></script>
+	<script type="text/javascript" src="{{url_for('static',filename='tryall.js')}}"></script>
+	<script type="text/javascript" src="{{url_for('static',filename='vis.min.js')}}"></script>
+	
+	<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style type="text/css">
+        #mynetwork {
+            width: 600px;
+            height: 400px;
+            border: 1px solid lightgray;
+        }
+    </style>
+</head>
+<body>
+	
+	<div class='standard'>
+		<div class='leftDiv'>
+			<h4>MST</h4>
+			
+			<div id="mst"></div>
+			
+			<script>
+			dataset={{dataset|tojson}};
+			console.log(dataset);
+			mst_nodes={{mst_nodes|tojson}};
+			mst_edges={{mst_path|tojson}};
+			labels={{labels|tojson}}
+			drawTree(mst_nodes,mst_edges,labels,"mst");
+			</script>
+			
+			<div id="properSpd"></div>
+			<script>
+			spd_nodes={{spd_nodes|tojson}};
+			spd_edges={{spd_path|tojson}};
+			drawTree(spd_nodes,spd_edges,labels,"properSpd");
+			</script>
+			
+		</div>
+		
+		
+		<div class="rightDiv">
+			<div id="spdMatrix"></div>
+			
+			<script>
+				var trace1 = {
+					x: [1, 2, 3, 4],
+					y: [10, 15, 13, 17],
+					type: 'scatter'
+				};
+				
+				var trace2 = {
+					x: [1, 2, 3, 4],
+					y: [16, 5, 11, 9],
+					type: 'scatter'
+				};
+				
+				var data = [trace1, trace2];
+				
+				//Plotly.newPlot('spdMatrix', data);	
+			
+			</script>
+			
+			<script>
+				var data = [
+				  {
+				    //z: [[1, 20, 30], [20, 1, 60], [30, 60, 1]],
+				    z: dataset,
+				    type: 'heatmap'
+				  }
+				];
+
+				Plotly.newPlot('spdMatrix', data);
+			
+			</script>
+			
+			<form class="form-signin" action="/signUp" method="post" role="form">
+				<input type="text" name="pqno" class="form-control" required autofocus>
+				<button class="btn btn-lg btn-primary btn-block" type="button">Register </button>
+			</form>
+			
+			<div id="cst"></div>
+			<script>
+			cst_nodes={{cst_nodes|tojson}};
+			cst_edges={{cst_path|tojson}};
+			drawTree(cst_nodes,cst_edges,labels,"cst");
+			</script>
+			
+			
+		</div>
+		
+		
+	
+	</div>
+	
+</body>
+</html>

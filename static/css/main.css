@@ -1,0 +1,182 @@
+body {
+  margin: 0;
+  padding: 0;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  color: #444;
+}
+/*
+ * Formatting the header area
+ */
+header {
+  background: #323534 url(logo.jpg) repeat-x;
+  height: 177px;
+}
+header h1.logo {
+  color: #00ff00;
+  font-size: 1.7em;
+  text-transform: uppercase;
+} 
+header h1.logo span{
+	background-color: #000000; 
+}
+header h1.logo:hover {
+  color: #fff;
+  text-decoration: none;
+}
+/*
+ * Centering the body content
+ */
+.container {
+  	position: relative;
+  	height: 177px;
+  	background: transparent;
+  	text-align: center;
+}
+#standard{
+	background: #ffffff;
+    padding-bottom: 75px;
+    line-height: 150%;
+    color: #000000;
+    overflow: auto;
+}
+#home {
+ 	overflow: auto;
+  
+}
+div.about {
+  padding: 10px 0 30px 0;
+  background-color: #E6E6FA;
+  -webkit-border-radius: 6px;
+     -moz-border-radius: 6px;
+          border-radius: 6px;
+}
+#column_r {
+    float: right;
+    width: 400px;
+    padding: 10px 30px 10px 40px;
+    /*margin: 0px 40px 0px 10px;*/
+    background-color: #c0c0c0;
+}
+
+#standard h1 {
+    margin-bottom: 6px;
+    margin-top: 30px;
+    font-size: 150%;
+    color: #008040;
+    font-family: Arial, Helvetica, Verdana, sans-serif;
+}
+
+#standard ul {
+    margin: 2px 0 4px 2px;
+}
+
+#column_l {
+    float: left;
+    width: 500px;
+    padding: 10px 20px 10px 40px;
+}
+
+#column_b {
+    width: 900px;
+    padding: 10px 70px 10px 30px;
+}
+
+h2 {
+  font-size: 3em;
+  margin-top: 40px;
+  text-align: center;
+  letter-spacing: -2px;
+}
+h3 {
+  font-size: 1.7em;
+  font-weight: 100;
+  margin-top: 30px;
+  text-align: center;
+  letter-spacing: -1px;
+  color: #999;
+}
+.menu {
+  float: right;
+  color: #fff;
+}
+.menu li {
+  display: inline;
+}
+.menu li span {
+   background-color: #000000;
+}
+.menu li + li {
+  margin-left: 35px;
+}
+.menu li a {
+  float: right;
+  color: #00ff00;
+  background-color: #000000;
+}
+.footer {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    line-height: 50px;
+    background-color: #444444;
+    color: white;
+    text-align: center;
+}
+.leftDiv{
+	float: left;
+	width: 40% 
+}
+.rightDiv{
+	float: right;
+	width: 40% 
+}
+.standard{
+	overflow: auto;
+	width: 100%;
+}
+#mynetwork {
+	width: 600px;
+	height: 400px;
+}
+ #myChart1 {
+ 	width: 600px;
+	height: 400px;
+}
+.slidecontainer {
+    width: 100%;
+}
+
+.slider {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 25px;
+    background: #d3d3d3;
+    outline: none;
+    opacity: 0.7;
+    -webkit-transition: .2s;
+    transition: opacity .2s;
+}
+
+.slider:hover {
+    opacity: 1;
+}
+
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 25px;
+    height: 25px;
+    background: #4CAF50;
+    cursor: pointer;
+}
+
+.slider::-moz-range-thumb {
+    width: 25px;
+    height: 25px;
+    background: #4CAF50;
+    cursor: pointer;
+}
+table, td {
+    	border: 1px solid black;
+}

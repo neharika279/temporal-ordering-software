@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<body>
+	{% extends "layout.html" %}
+	{% block content %}
+	<div id="column_l">
+		<h1>Temporal Ordering of Sampled Data Readings for Biological Data</h1>
+		<p>This is a web-based application that makes available different techniques to order data samples temporally.
+		Any of these methods can be used for data that has been sampled at various points in time, where the exact time point of sampling in unknown. 
+		this can be used in the following way:
+		</p>
+		<ul>
+			<li>Upload file containing data samples, without sampling times, in a valid format</li>
+			<li>Select the temporal ordering approach to be used on the input data</li>
+			<li>Obtain an ordering of the data samples. The ordering is given in the form of numbers for the data samples that is based on their order in the 
+			input file. The results are displayed graphically as well</li>
+		</ul>
+		
+		<p>These methods can be used for biological data such as gene expressions, mRNA profiling experiments,
+		cell lineage tracing. Although the algorithms implemented here were primarily constructed for biological data, it can find applications in 
+		any kind data that follows a chronological order. For instance, archeological samples.
+		This is because, the main principle behind all these methods, is to find the distance or level of dissimilarity between data points, and use that 
+		to predict the closeness of the sampled data points with respect to time. This is assuming the data is for a process that progresses or changes as
+		a function of time.
+		</p>
+		
+		<form method=post enctype=multipart/form-data>
+      		<p><input type=file name=file><br>
+      		Select file type uploaded:<br>
+      		<tr>
+      			<td><input type="radio" name="options" id="option1" value="option1"> Tab Separated </input></td>
+      			<td><input type="radio" name="options" id="option2" value="option2"> Comma Separated </input></td>
+      		</tr><br>
+      		
+      		Choose a label option:<br>
+      		<tr>
+      			<td><input type="radio" name="labeloptions" id="option3" value="nolabel"> Without Labels </input></td>
+      			<td><input type="radio" name="labeloptions" id="option4" value="label"> With Labels </input></td>
+      		</tr><br>
+			
+        	<input type=submit value="Upload and Select Method"></p>
+    	</form>
+		
+	</div>
+	<div id="column_r">
+		<h1>File Format</h1>
+		<p>The input file provided must either be a tab seperated file, or a comma seperated file.
+		Each new line of the file would denote an observation/sampling done in an unknown time point.
+		Each tab or comma seperated value in every line will indicate the values of the biological variables recorded for that instance of sampling</p>
+		
+		
+	</div>
+	</div>   
+	{% endblock %}
+</body>
+</html>

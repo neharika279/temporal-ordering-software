@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+	<script src="http://code.highcharts.com/highcharts.js"></script>
+	<script src="{{url_for('static', filename='graph.js')}}"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.6.0/Chart.min.js"></script>
+    
+    <style type="text/css">
+        #mynetwork {
+            width: 600px;
+            height: 400px;
+            border: 1px solid lightgray;
+        }
+    </style>
+</head>
+<body>
+	
+	<div class='standard'>
+		<h1>Results</h1>
+		<h4>Time Order: {{ value }}</h4>
+		<div class='leftDiv'>
+			<h4>Minimum Spanning Tree</h4>
+			
+			<div id="mynetwork">
+				<img src="{{url_for('static', filename=plot_url)}}">
+			</div>
+			<p id="demo"></p>
+		</div>
+		<canvas id="myChart1"></canvas>
+		<script>
+			var x = new Chart(document.getElementById("myChart1"), {
+   			type: 'scatter',
+		   	data: {
+		      datasets: [{
+		         label: "Test",
+		         data: [{
+		            x: 0,
+		            y: 0
+		         }, {
+		            x: 1,
+		            y: 24
+		         }, {
+		            x: 2,
+		            y: 23
+		         }, {
+		            x: 3,
+		            y: 22
+		         },{
+		            x: 4,
+		            y: 21
+		         },{
+		            x: 5,
+		            y: 20
+		         },{
+		            x: 6,
+		            y: 19
+		         },{
+		            x: 7,
+		            y: 18
+		         },{
+		            x: 8,
+		            y: 17
+		         },{
+		            x: 9,
+		            y: 16
+		         },{
+		            x: 10,
+		            y: 15
+		         }],
+		         fill: false,
+		         showLine: true
+		      	}]	
+		   	},
+		   	options: {
+		      responsive: true
+		   	}
+		});
+		</script>
+		<div id={{ chartID|safe }} class="rightDiv">
+			
+			
+			<script>
+				var chart_id = {{ chartID|safe }}
+				var series = {{ series|safe }}
+				var title = {{ title|safe }}
+				var xAxis = {{ xAxis|safe }}
+				var yAxis = {{ yAxis|safe }}
+				var chart = {{ chart|safe }}
+			</script>
+			
+		
+		</div>
+	
+	</div>
+	
+</body>
+</html>
