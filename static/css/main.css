@@ -135,7 +135,7 @@ h3 {
 	overflow: auto;
 	width: 100%;
 }
-#mynetwork {
+#mynetwork,#myorderednetwork,#backbone {
 	width: 600px;
 	height: 400px;
 }
@@ -179,4 +179,10 @@ h3 {
 }
 table, td {
     	border: 1px solid black;
+}
+
+.button{
+	
+	-moz-appearance: button;
+	-webkit-appearance: button;
 }

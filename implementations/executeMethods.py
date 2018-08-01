@@ -91,7 +91,7 @@ def executeBasicMST(alpha):
         
     dataset=np.array(alpha)
     
-    distMat=mop.getDistanceMatrix(alpha)
+    distMat=get_distance_mat(alpha)
     resultGraph=mop.getMST(range(len(distMat)),distMat)
     diamPath,diamLength=mop.getDiameterPath(resultGraph,0)
     
@@ -101,6 +101,9 @@ def executeBasicMST(alpha):
     
     return diamPath,edges,resultGraph,branch,label_dict
 
+
+def get_distance_mat(dataset):
+    return mop.getDistanceMatrix(dataset)
 
 def findBranch(resultGraph,diamPath):
     
@@ -266,15 +269,19 @@ def cst(dataset):
     temp_list=[]
     for p in path:
         a,b=p
-        temp_list.append(int(a))
-        temp_list.append(int(b))
+        if a not in temp_list:
+            temp_list.append(int(a)) 
+        if b not in temp_list:
+            temp_list.append(int(b))
     
-    dpath=list(set(temp_list))
+    dpath=temp_list
     
     branch,branchList=findBranch(graph, dpath)
     
     return dpath,cst_edges,label_dict,graph,branch
 
+def get_edges(graph):
+    return mop.graph.edges(graph)
 
 def get_dict(tcsr):
     
@@ -334,12 +341,121 @@ def spd(dataset,param_dict):
     return dpath,spd_edges,label_dict,result_progMat,graph,branch
 
 
-
-
-
-
-
-
-
+def get_order_dist_mat(dataset,ordering):
+    
+    parsed_order=parse_order(ordering)
+    
+    ordering_matrix=[[]]
+   
+ 
+    for orderno in parsed_order:
+        
+        ordering_matrix.append(dataset[orderno])
+    
+    ordering_matrix.pop(0)
+    ordering_matrix=np.array(ordering_matrix)
+    
+    distmat=get_distance_mat(ordering_matrix)
+    distmat=list(list(float(d) for d in r) for r in distmat)
     
     
+    return distmat
+
+def parse_order(ordering):
+    
+    order=str(ordering)
+    
+    for ch in ['[',']']:
+
+        if ch in order:
+           
+            replaced_order=order.replace(ch,'')
+            order=replaced_order
+    
+    
+    ord=replaced_order.split(',')
+   
+    parsed_order=list(int(k) for k in ord)
+    
+    return parsed_order
+
+def get_order_dimension_readings(dataset,ordering):
+
+    order_dimension_readings=[[]]
+    parsed_order=parse_order(ordering)
+    
+    for orderno in parsed_order:
+        order_dimension_readings.append(dataset[orderno])
+    
+    order_dimension_readings.pop(0)
+    trans_order_dimension=np.transpose(order_dimension_readings)
+    
+    trans_order_dimension=list(list(float(d) for d in r) for r in trans_order_dimension)
+    
+    return trans_order_dimension
+
+def get_indecisive_backbone(mst,dpath):
+    return mop.indecisive_backbone(mst, dpath)
+
+
+def get_decisive_indecisive_nodes(mst):
+    return mop.decisive_indecisive(mst)
+
+# def delete_this_later():
+#      
+#     data=readFromFile("alpha.txt", "option1", "label")
+#     diamPath,edges,resultGraph,branch,label_dict=executeBasicMST(data)
+#     backbone=get_indecisive_backbone(resultGraph, diamPath)
+#     print backbone
+#     print len(backbone)
+#     di=get_decisive_indecisive_nodes(resultGraph)
+#     print "di:"
+#     print di
+#      
+# delete_this_later()
+
+# def tryth():
+#     
+#     data=readFromFile("alphamod.txt", "option1", "label")
+#     #print data
+#     distMat=get_distance_mat(data)
+#     #dpath,cst_edges,label_dict,graph,branch=cst(data)
+#     dpath,edges,graph,branch,label_dict=executeBasicMST(data)
+#     
+#     tupDiampath=tuple(dpath)
+#     
+#     
+#     print "graph:"
+#     print graph
+#     print "edges:"
+#     print edges
+#     
+#     pqtree = mop.make_pqtree(graph)
+#     
+#     
+#     
+#     results=mop.diameterpath_branches(graph, tupDiampath)
+#     
+#      
+#     branchList=results.branches.values()
+#      
+#     if all(subList==[] for subList in branchList):
+#         print "no branch exists"
+#        
+#     else:
+#         print"branch exists"
+#         #print "branches:" 
+#         #print len(branchList)
+#         #for sublist in branchList:
+#         #    print sublist
+#         pqperm = mop.pqtree_perms(pqtree)
+#         print ""
+#         #print "pq_perm::"
+#         #print pqperm
+#         rpaths = mop.rank_paths(pqperm, distMat)
+#          
+#         for i in range(3):
+#             print i, rpaths.paths[i], rpaths.lengths[i]
+
+
+#tryth()
