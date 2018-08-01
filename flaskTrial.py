@@ -3,7 +3,7 @@ Created on 18-Dec-2017
 
 @author: Neharika Mazumdar
 '''
-import os
+import os,ast
 import json
 import importlib
 from flask import Flask, session
@@ -15,6 +15,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import networkx as nx
 import path
+from implementations.executeMethods import get_indecisive_backbone,\
+    get_decisive_indecisive_nodes
 
 UPLOAD_FOLDER = 'C:\Users\Public'
 #FILE_NAME=''
@@ -268,6 +270,63 @@ def displayResultsPQ(dPath,pq_perm,edges,chartID = 'chart_ID', chart_type = 'spl
     xAxis = {}#{"labels":{"enabled":False}}
     yAxis = {"title": {"text": 'yAxis Label'}}
     return render_template('resultspq.html', chartID=chartID, chart=chart, series=series, title=title, xAxis=xAxis, yAxis=yAxis, value=dPath,nodes=node_list,pq=pq_perm,edges=edges)
+ 
+@app.route('/analyze/<ordering>/<mstgraph>') 
+def analyze(ordering,mstgraph):
+    
+    filepath=session['filepath']
+    filetype=session['filetype']
+    labeltype=session['label']
+    order=ex.parse_order(ordering)
+    order=list(int(k) for k in order)
+    
+    alpha=ex.readFromFile(filepath, filetype, labeltype)
+    graph=ast.literal_eval(mstgraph)
+    graph_new={int(k):{int(i):float(j) for i,j in v.items()} for k,v in graph.items()}
+    dataset=np.array(alpha)
+    
+    distmat=ex.get_order_dist_mat(dataset, ordering)
+    dimension_reading=ex.get_order_dimension_readings(dataset, ordering)
+    backbone=get_indecisive_backbone(graph_new,order)
+    di=get_decisive_indecisive_nodes(graph_new)
+    
+    edges=ex.get_edges(graph_new)
+    e,nodes=ex.get_nodes_and_edges(edges)
+    di_json=json.dumps(di)
+    graph_json=json.dumps(graph_new)
+    #print "bacnkbone:"
+    #print backbone
+ 
+    return render_template('analyzeResults.html',orderDistMat=distmat,dimRead=dimension_reading,order=order,nodes=nodes,edges=e,backbone=backbone,d_i=di_json)
+
+
+@app.route('/enteredOrdering', methods=['POST'])
+def in_place_analysis():
+    
+    filepath=session['filepath']
+    filetype=session['filetype']
+    labeltype=session['label']
+    
+    request_data = json.loads(request.data)
+    ordering = request_data["order"]
+    order=ex.parse_order(ordering)
+    order=list(int(k) for k in order)
+    
+    alpha=ex.readFromFile(filepath, filetype, labeltype)
+    
+    #graph_new={int(k):{int(i):float(j) for i,j in v.items()} for k,v in graph.items()}
+    dataset=np.array(alpha)
+    
+    distmat=ex.get_order_dist_mat(dataset, ordering)
+    dimension_reading=ex.get_order_dimension_readings(dataset, ordering)
+    
+
+    response_data={}
+    response_data["distmat"]=distmat
+    response_data["dimension_reading"]=dimension_reading
+    response_data["order"]=order
+    return json.dumps(response_data)
+
     
 @app.route('/computePQ', methods=['POST'])   
 def exec_pq_trees():
@@ -285,13 +344,18 @@ def exec_pq_trees():
     labeltype=session['label']
     pq_ranks,total_paths=ex.executePQtree(filename,filetype,labeltype,graph_new,dpath,int(pqnum))
     
+    print "pqranks:"
+    print pq_ranks
+    print "total pq:"
+    print total_paths
+    
     if pq_ranks:
         for pqorder in range (len(pq_ranks)):
             
             pq_orderings[pqorder]=ex.get_complete_ordering(pq_ranks[pqorder],graph_new)
                 
-        print "pq_orderings:"
-        print pq_orderings
+        #print "pq_orderings:"
+        #print pq_orderings
     
     pq_orders=json.dumps(pq_orderings)
     pq=json.dumps(pq_ranks)
@@ -300,7 +364,7 @@ def exec_pq_trees():
     response_data["pqranks"]=pq
     response_data["pqorders"]=pq_orders
     response_data["totalpq"]=total_paths
-    return json.dumps(response_data);
+    return json.dumps(response_data)
 
 
 #trythis()

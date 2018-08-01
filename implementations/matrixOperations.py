@@ -567,6 +567,20 @@ def indecisive_backbone(G, diameterpath):
     
     return diameterpath[firstidx:lastidx+1]
 
+def decisive_indecisive(mst):
+    
+    d_i={"d":[],"i":[]}
+    
+    node_list=mst.keys()
+    
+    for vertex in node_list:
+        if graph.degree(mst, vertex) >= 3:
+            d_i.get("i").append(vertex)
+        else:
+            d_i.get("d").append(vertex)
+
+    return d_i
+
 def calc_noise_ratio(graph,branch_list):
     
     keys=graph.keys()
