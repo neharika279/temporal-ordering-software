@@ -750,6 +750,75 @@ function drawDistMat(distmat){
 	Plotly.newPlot('distmat', data);
 }
 
+function getPCAForOrder(order){
+	
+	var ordering = String("["+String(order)+"]");
+	
+	post_data = {}
+    post_data["order"] = ordering
+    //post_data["graph"] = graph_dict
+    
+    
+    $.ajax({
+        url: '/pca',
+        data:JSON.stringify(post_data),
+        type: 'POST',
+        contentType:"text/json",  
+        success: function(response){
+        	//console.log(response);
+        	drawPCA(response);
+        },
+        error: function(error) {
+            console.log(error);
+        }
+    });
+	
+}
+
+function drawPCA(response){
+	
+	var chartData=[];
+	var res_response=JSON.parse(response);
+	var data=res_response["pca_values"];
+	//var x = [1,2,3,4,5];
+	//var y = [3,4,5,7,8];
+	//var z = [5,10,2,3,4]; 
+	var c = ["red","green","yellow"];
+	
+	/*var trace={
+			type: 'scatter3d',
+			//mode: 'lines',
+			x: data[0],
+			y: data[1],
+			z: data[2],
+			opacity: 1,
+			line: {
+				width: 6,
+				color: ,
+				reversescale: false
+			  }	
+	}
+	data.push(trace);*/
+	
+	
+	Plotly.plot('pca', [{
+	  type: 'scatter3d',
+	  //mode: 'lines',
+	  x: data[0],
+	  y: data[1],
+	  z: data[2],
+	  opacity: 1,
+	  line: {
+	    width: 6,
+	    color: c,
+	    reversescale: false
+	  }
+	}]);/*, {
+	  height: 640
+	});*/
+	//Plotly.plot('pca',data);
+}
+
 function isEmpty(obj) {
     for(var key in obj) {
         if(obj.hasOwnProperty(key))

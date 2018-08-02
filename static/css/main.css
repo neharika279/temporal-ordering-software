@@ -135,10 +135,16 @@ h3 {
 	overflow: auto;
 	width: 100%;
 }
-#mynetwork,#myorderednetwork,#backbone {
+#mynetwork,#myorderednetwork,#backbone{
 	width: 600px;
 	height: 400px;
 }
+
+#pca {
+	width: 800px;
+	height: 600px;
+	
+} 
  #myChart1 {
  	width: 600px;
 	height: 400px;

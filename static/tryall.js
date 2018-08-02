@@ -141,3 +141,31 @@ function thisFunct(){
         });
     });
 });*/
+
+
+function threed(data){
+	
+	var x = [1,2,3,4,5];
+	var y = [3,4,5,7,8];
+	var z = [5,10,2,3,4]; 
+	var c = ["red","green","yellow"];
+	Plotly.plot('dimension', [{
+	  type: 'scatter3d',
+	  //mode: 'lines',
+	  x: data[0],
+	  y: data[1],
+	  z: data[2],
+	  opacity: 1,
+	  line: {
+	    width: 6,
+	    color: c,
+	    reversescale: false
+	  }
+	}], {
+	  height: 640
+	});
+}
+
+
+
+

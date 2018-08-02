@@ -123,11 +123,11 @@
 
 		<div id="chart" class="rightDiv">
 			<h4>Ordering of samples</h4>
-			<canvas id="myChart1" width="600" height="400"></canvas>
-			
+<!-- 			<canvas id="myChart1" width="600" height="400"></canvas> -->
+				<div id="pca" style="float:left;clear:left"></div>
 			<script>
 				var order= {{ ordering|tojson }};
-				drawChart(order,counts)
+				getPCAForOrder(dPath);
 			</script>
 			
 			<p id="message">{{msg}}</p>

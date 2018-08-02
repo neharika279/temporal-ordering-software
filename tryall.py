@@ -6,6 +6,7 @@ from flask import Flask, session,request
 from flask.templating import render_template
 from flaskTrial import mst
 import numpy as np
+from sklearn.decomposition import PCA as sklearnPCA
 import json
 app = Flask(__name__)
 
@@ -132,12 +133,22 @@ def get_dict(tcsr):
     #print tcsr_graph_dict
     return tcsr_graph_dict
     ##########################################################################################################
+@app.route("/",methods=['GET','POST'])
 def pca():
     
-    data=[[1,2.3,4,-5.7],[3,5.8,-2.0,1],[7.9,6,10]]
+    data=[[1,2.3,4,-5.7],[3,5.8,-2.0,1],[7.9,6,10,1.7]]
+    sklearn_pca = sklearnPCA(n_components=3)
+    Y_sklearn = sklearn_pca.fit_transform(data)
+    print "pca:"
+    print Y_sklearn
+    print type(Y_sklearn)
+    print type(Y_sklearn[0])
+    print type(Y_sklearn[0][0])
+    data_new=list(list(float(f) for f in d) for d in Y_sklearn)
+    print data_new
+    return render_template('signUp.html',data=data_new)
     
-    
-@app.route("/",methods=['GET','POST'])
+#@app.route("/",methods=['GET','POST'])
 def signUp():
     dataset=[[1,2,3],[4,5,6]]
     r_dataset=list(list(d) for d in dataset)
