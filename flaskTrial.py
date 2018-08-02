@@ -15,6 +15,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import networkx as nx
 import path
+from sklearn.decomposition import PCA as sklearnPCA
 from implementations.executeMethods import get_indecisive_backbone,\
     get_decisive_indecisive_nodes
 
@@ -299,6 +300,41 @@ def analyze(ordering,mstgraph):
  
     return render_template('analyzeResults.html',orderDistMat=distmat,dimRead=dimension_reading,order=order,nodes=nodes,edges=e,backbone=backbone,d_i=di_json)
 
+@app.route('/pca', methods=['POST'])
+def get_pca():
+    
+    pca_matrix=[]
+    filepath=session['filepath']
+    filetype=session['filetype']
+    labeltype=session['label']
+    
+    request_data = json.loads(request.data)
+    ordering = request_data["order"]
+    order=ex.parse_order(ordering)
+    order=list(int(k) for k in order)
+    #print "order:"
+    #print order
+    alpha=ex.readFromFile(filepath, filetype, labeltype)
+    
+    dataset=np.array(alpha)
+    #print "original dataset:"
+    #print  dataset
+    
+    for orderno in order:
+        
+        pca_matrix.append(dataset[orderno])
+    
+    #print "pca_matrix:"
+    #print pca_matrix
+    
+    sklearn_pca = sklearnPCA(n_components=3)
+    Y_sklearn = sklearn_pca.fit_transform(pca_matrix)
+    
+    final_pca_values=np.transpose(Y_sklearn)
+    final_pca_values=list(list(float(f) for f in d) for d in final_pca_values)
+    response_data={}
+    response_data["pca_values"]=final_pca_values
+    return json.dumps(response_data)
 
 @app.route('/enteredOrdering', methods=['POST'])
 def in_place_analysis():
