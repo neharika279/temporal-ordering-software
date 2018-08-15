@@ -20,15 +20,22 @@
 		
 		<div class='leftDiv'>
 			<h4>Distance matrix for n-dimensional points in the order</h4>
+			
+			<script>
+			var distmat={{orderDistMat|tojson}};
+			var order={{order|tojson}};
+			</script>
 			<div id="distmat"></div>
+			<input type="checkbox" id="changeDistMat" name="treeview"
+					value="ordered" onclick="dimensionChange(order,distmat)">View distance matrix for dimensions across all data samples
 			<h4>Indecisive Backbone for the Diameter Path - Basis for computation of alternative orderings</h4>
 			<div id="backbone" style="clear: left"></div>
 			<script>
-				var distmat={{orderDistMat|tojson}};
+				
 				var nodes={{nodes|tojson}};
 				var edges={{edges|tojson}};
 				var dimRead={{dimRead|tojson}};
-				var order={{order|tojson}};
+				
 				var backbone={{backbone|tojson}};
 				var di={{d_i|tojson}};
 				

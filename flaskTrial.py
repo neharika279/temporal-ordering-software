@@ -336,6 +336,38 @@ def get_pca():
     response_data["pca_values"]=final_pca_values
     return json.dumps(response_data)
 
+
+@app.route('/getTransposedDistance', methods=['POST'])
+def get_transposed_distance_mat():
+    
+    ordering_matrix=[]
+    filepath=session['filepath']
+    filetype=session['filetype']
+    labeltype=session['label']
+    
+    request_data = json.loads(request.data)
+    ordering = request_data["order"]
+    order=ex.parse_order(ordering)
+    order=list(int(k) for k in order)
+    
+    alpha=ex.readFromFile(filepath, filetype, labeltype)
+    dataset=np.array(alpha)
+    
+    
+    for orderno in order:
+        
+        ordering_matrix.append(dataset[orderno])
+    
+    trans_ordering_matrix=np.transpose(ordering_matrix)
+    
+    distmat_new=ex.get_distance_mat(trans_ordering_matrix)
+    
+    distmat_new=list(list(float(d) for d in r) for r in distmat_new)
+    response_data={}
+    response_data["distmat"]=distmat_new
+    return json.dumps(response_data)
+
+
 @app.route('/enteredOrdering', methods=['POST'])
 def in_place_analysis():
     

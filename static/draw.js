@@ -229,8 +229,8 @@ function drawBackbone(nodes,edges,backbone,di){
 	var decisive=result_di["d"];
 	var indecisive=result_di["i"];
 	
-	console.log(decisive);
-	console.log(indecisive);
+	//console.log(decisive);
+	//console.log(indecisive);
 	
 	
 	for (var i = 0; i < arrayLength; i++) {
@@ -500,7 +500,7 @@ function displayPQ(nodeList,response) {
 function tempSaveOrder(){
 
 	order=document.querySelector('input[name="pqperms"]:checked').value
-	console.log(order);
+	//console.log(order);
 	orderList=[];
 	
 	orderArray=order.split(",");
@@ -686,6 +686,7 @@ function inPlaceAnalysis(response){
 	
 	showDimensions(dimRead,order);
 	drawDistMat(distmat);
+	document.getElementById("changeDistMat").checked = false;
 }
 
 
@@ -699,13 +700,13 @@ function showDimensions(dimRead,order){
 	var xaxis=[];
 	
 	var orderLen=order.length;
-	console.log(orderLen);
+	//console.log(orderLen);
 	var dimensionLen=dimRead.length;
 	
 	for(var i=0;i<orderLen;i++){
 		xaxis.push(i+1);
 	}
-	console.log(xaxis);
+	//console.log(xaxis);
 	
 	for(var j=0;j<dimensionLen;j++){
 		
@@ -718,7 +719,7 @@ function showDimensions(dimRead,order){
 		data.push(trace);
 	}
 	
-	console.log(data);
+	//console.log(data);
 	/*var trace1 = {
 			x: [1, 2, 3, 4],
 			y: [10, 15, 13, 17],
@@ -810,13 +811,55 @@ function drawPCA(response){
 	  opacity: 1,
 	  line: {
 	    width: 6,
-	    color: c,
+	    color: "yellow",
 	    reversescale: false
 	  }
 	}]);/*, {
 	  height: 640
 	});*/
 	//Plotly.plot('pca',data);
+}
+
+function dimensionChange(order,distmat){
+	
+	var checkBox = document.getElementById("changeDistMat");
+	var ordering = String("["+String(order)+"]");
+	
+	if (checkBox.checked == true) {
+		
+		drawTransposedMatrix(ordering)
+		//newDistMat=(distmat[0].map((col, i) => distmat.map(row => row[i])));
+		//console.log(newDistMat);
+		//drawDistMat(newDistMat);
+	}
+	else if(checkBox.checked == false){
+		console.log(distmat);
+		drawDistMat(distmat);
+	}
+	
+}
+
+function drawTransposedMatrix(order){
+	
+	post_data = {}
+    post_data["order"] = order
+    
+    $.ajax({
+        url: '/getTransposedDistance',
+        data:JSON.stringify(post_data),
+        type: 'POST',
+        contentType:"text/json",  
+        success: function(response){
+        	console.log(response)
+        	var res_response=JSON.parse(response);
+        	var distmat=res_response["distmat"];
+        	drawDistMat(distmat);
+        },
+        error: function(error) {
+            console.log(error);
+        }
+    });
+	
 }
 
 function isEmpty(obj) {
