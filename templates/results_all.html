@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script type="text/javascript" src="{{url_for('static',filename='vis.min.js')}}"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+	<script src="http://code.highcharts.com/highcharts.js"></script>
+    <link href="{{ url_for('static', filename='vis.min.css') }}" rel="stylesheet" type="text/css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.6.0/Chart.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script type="text/javascript" src="{{url_for('static',filename='draw.js')}}"></script>
+    
+</head>
+<body>
+	{% extends "layout.html" %}
+	{% block content %}
+	
+	<div class='standard'>
+		<h1>Results</h1><br>
+		<h4>Minimum Spanning Tree</h4>
+		<input id="savedorder" name="order" type="hidden">
+		<script>
+			var params_js={{params|tojson}};
+			var res_params=JSON.parse(params_js);
+			var dPathMST=res_params['mst']['dpath'];
+			var dPathCST=res_params['cst']['dpath'];
+			var dPathSPD=res_params['spd']['dpath'];
+			var dPathUN=res_params['spd']['dpath'];
+		</script>
+		<a href="{{ url_for('analyze_all',params=params) }}" id="analysis_all" target="_blank" class="button" style="float: right">Analyze Orderings</a>
+		
+		
+<!-- 		<input id="analysis" type="button" value="Analyze Ordering" onclick="distanceMatrix(dPath);" /> -->
+		
+		<div class='leftDiv'>
+			
+			<div id="mst">
+				<h4>Minimum Spanning Tree-MST</h4>
+				<div class="draw" id="mynetwork-mst" style="visibility: visible"></div>
+				<div class="draw" id="myorderednetwork-mst" style="visibility: hidden; margin-top: -20em"></div>
+				
+				<p id="demo"></p>
+				<input type="checkbox" id="ordered-mst" name="treeview"
+						value="ordered" onclick="treeView('myorderednetwork-mst','mynetwork-mst','ordered-mst')">Tree showing specific order
+	
+				<script>
+					
+					var xMST= res_params['mst']['edges'];
+					var labelsMST=res_params['mst']['labels'];
+					var countsMST = res_params['mst']['nodes'];
+					drawWithLabels(countsMST,xMST,dPathMST,labelsMST,"mynetwork-mst");
+					drawWithoutLabels(countsMST,xMST,dPathMST,"myorderednetwork-mst");
+				</script>
+	
+							
+				<script>
+				var noiseRatioMST= res_params['mst']['noise'];
+				var intensityRatioMST= res_params['mst']['intensity'];
+				</script>
+	
+				<div class="pqContainer" style="float: left; clear: left">
+	
+					<h4>
+						Noise Percentage: <input type="text" id="mstNoise" style="border:0" /><br> Sampling intensity:
+						<input type="text" id="mstIntensity" style="border:0"/><br> Select your threshold percent for noise:
+					</h4>
+					<script>
+						document.getElementById("mstNoise").value = noiseRatioMST;
+						document.getElementById("mstIntensity").value = intensityRatioMST;
+					</script>
+					
+					<div id="sliderElem-mst" class="slidecontainer" style="visibility:visible">
+				    	
+				    	<input type="range" min="1" max="100" value="50" class="slider" id="myRange-mst" name="name_of_slider">
+				    	<input id="clickMe" type="button" value="Compute" onclick="sliderFunction(noiseRatioMST,'myRange-mst','pq-mst','messageMST');" />
+				  		<p>
+				  		Value: <span id="slide-mst"></span>
+				  		<p id="messageMST"></p>
+				  		</p>
+				  		
+					</div>
+				
+	
+					<script>
+					var sliderMST = document.getElementById("myRange-mst");
+					var outputMST = document.getElementById("slide-mst");
+					outputMST.innerHTML = sliderMST.value;
+					
+					sliderMST.oninput = function() {
+					  outputMST.innerHTML = this.value;
+					}
+					</script>
+					
+					<script>
+						var bMST = res_params['mst']['branch'];
+						if(bMST==1){
+							document.getElementById("sliderElem-mst").style.visibility = "visible";
+						}
+					</script>
+				</div>
+				
+				<script>
+					graphMST=res_params['mst']['graph'];
+			
+				</script>
+				<div id="pq-mst" class="pqContainer" style="float:left;clear:left;visibility:hidden">
+					<h4>Candidate Orderings for samples generated using PQ trees</h4>
+					<h5>Enter the number of alternative orderings to display:</h5>
+					<td><input type="text" id="pqno-mst" maxlength="4" size="4"></td>
+					<td><input id="clickMe-mst" type="button" value="Compute" onclick="computePQ(countsMST,dPathMST,graphMST,'pqno-mst','pqorder-mst','orders-mst','pq-mst','myorderednetwork-mst','mynetwork-mst');" /></td><br>
+					<p id="totalPQ-mst"></p><br>
+					<p id="pqorder-mst"></p><br>
+<!-- 					<div id="orders-mst"></div> -->
+					
+					
+					
+					
+				</div>
+			
+			
+			</div>
+			
+			<div id="cst" style="float:left;clear:left">
+				<h4>Minimum Spanning Tree-CST</h4>
+				<div class="draw" id="mynetwork-cst" style="visibility: visible"></div>
+				<div class="draw" id="myorderednetwork-cst"
+					style="visibility: hidden; margin-top: -20em"></div>
+
+				<p id="demo"></p>
+				<input type="checkbox" id="ordered-cst" name="treeview"
+						value="ordered" onclick="treeView('myorderednetwork-cst','mynetwork-cst','ordered-cst')">Tree showing specific
+						order
+
+				<script>
+					
+					var xCST= res_params['cst']['edges'];
+					var labelsCST=res_params['cst']['labels'];
+					var countsCST = res_params['cst']['nodes'];
+					drawWithLabels(countsCST,xCST,dPathCST,labelsCST,"mynetwork-cst");
+					drawWithoutLabels(countsCST,xCST,dPathCST,"myorderednetwork-cst");
+				</script>
+
+
+				<script>
+				var noiseRatioCST= res_params['cst']['noise'];
+				var intensityRatioCST= res_params['cst']['intensity'];
+				</script>
+
+				<div class="pqContainer" style="float: left; clear: left">
+
+					<h4>
+						Noise Percentage: <input type="text" id="cstNoise" style="border:0" /><br> Sampling intensity:
+						<input type="text" id="cstIntensity" style="border:0" /><br> Select your threshold percent for noise:
+					</h4>
+					
+					<script>
+						document.getElementById("cstNoise").value = noiseRatioCST;
+						document.getElementById("cstIntensity").value = intensityRatioCST;
+					</script>
+					<div id="sliderElem-cst" class="slidecontainer"
+						style="visibility: visible">
+
+						<input type="range" min="1" max="100" value="50" class="slider"
+							id="myRange-cst" name="name_of_slider"> <input id="clickMe"
+							type="button" value="Compute"
+							onclick="sliderFunction(noiseRatioCST,'myRange-cst','pq-cst','messageCST');" />
+						<p>
+							Value: <span id="slide-cst"></span>
+							<p id="messageCST"></p>
+							
+						</p>
+
+					</div>
+
+
+					<script>
+					var sliderCST = document.getElementById("myRange-cst");
+					var outputCST = document.getElementById("slide-cst");
+					outputCST.innerHTML = sliderCST.value;
+					
+					sliderCST.oninput = function() {
+					  outputCST.innerHTML = this.value;
+					}
+					</script>
+
+					<script>
+						var bCST = res_params['cst']['branch'];
+						if(bCST==1){
+							document.getElementById("sliderElem-cst").style.visibility = "visible";
+						}
+					</script>
+				</div>
+
+				<script>
+					graphCST=res_params['cst']['graph'];
+				
+				</script>
+				<div id="pq-cst" class="pqContainer"
+					style="float: left; clear: left; visibility: hidden">
+					<h4>Candidate Orderings for samples generated using PQ trees</h4>
+					<h5>Enter the number of alternative orderings to display:</h5>
+					<td><input type="text" id="pqno-cst" maxlength="4" size="4"></td>
+					<td><input id="clickMe-cst" type="button" value="Compute"
+						onclick="computePQ(countsCST,dPathCST,graphCST,'pqno-cst','pqorder-cst','orders-cst','pq-cst','myorderednetwork-cst','mynetwork-cst');" /></td>
+					<br>
+					<p id="totalPQ-cst"></p>
+					<br>
+					<p id="pqorder-cst"></p>
+					<br>
+					<!-- 				<div id="orders"></div> -->
+
+
+
+
+				</div>
+
+
+			</div>
+			<div id="pca-mst-outer" style="float:left;clear:left">
+				<h4>Ordering of samples</h4>
+				<h4>MST</h4>
+				<!-- 			<canvas id="myChart1" width="600" height="400"></canvas> -->
+				<div class="pca" id="pca-mst" style="float: left; clear: left"></div>
+				<script>
+				
+				getPCAForOrder(dPathMST,"pca-mst");
+				</script>
+
+				<!-- 			<p id="message">{{msg}}</p> -->
+				
+
+
+			</div> 
+			
+			<div id="pca-cst-outer" style="float:left;clear:left">
+				<h4>CST</h4>
+				<!-- 			<canvas id="myChart1" width="600" height="400"></canvas> -->
+				<div class="pca" id="pca-cst" style="float: left; clear: left"></div>
+				<script>
+				
+				getPCAForOrder(dPathCST,"pca-cst");
+				</script>
+	
+				<!-- 			<p id="message">{{msg}}</p> -->
+				
+
+
+			</div> 
+			
+
+		</div>
+
+		<div id="chart" class="rightDiv">
+			
+			<div id="spd">
+				<br>
+				<h4>Minimum Spanning Tree-SPD</h4>
+				<div class="draw" id="mynetwork-spd" style="visibility: visible"></div>
+				<div class="draw" id="myorderednetwork-spd"
+					style="visibility: hidden; margin-top: -20em"></div>
+
+				<p id="demo"></p>
+				<input type="checkbox" id="ordered-spd" name="treeview"
+						value="ordered" onclick="treeView('myorderednetwork-spd','mynetwork-spd','ordered-spd')">Tree showing specific
+						order
+
+				<script>
+					
+					var xSPD= res_params['spd']['edges'];
+					var labelsSPD=res_params['spd']['labels'];
+					var countsSPD = res_params['spd']['nodes'];
+					drawWithLabels(countsSPD,xSPD,dPathSPD,labelsSPD,"mynetwork-spd");
+					drawWithoutLabels(countsSPD,xSPD,dPathSPD,"myorderednetwork-spd");
+				</script>
+
+
+				<script>
+				var noiseRatioSPD= res_params['spd']['noise'];
+				var intensityRatioSPD= res_params['spd']['intensity'];
+				</script>
+
+				<div class="pqContainer" style="float: left; clear: left">
+
+					<h4>
+						Noise Percentage: <input type="text" id="spdNoise" style="border:0" /><br> Sampling intensity:
+						<input type="text" id="spdIntensity" style="border:0" /><br> Select your threshold percent for noise:
+					</h4>
+					
+					<script>
+						document.getElementById("spdNoise").value = noiseRatioSPD;
+						document.getElementById("spdIntensity").value = intensityRatioSPD;
+					</script>
+					<div id="sliderElem-spd" class="slidecontainer"
+						style="visibility: visible">
+
+						<input type="range" min="1" max="100" value="50" class="slider"
+							id="myRange-spd" name="name_of_slider"> <input id="clickMe"
+							type="button" value="Compute"
+							onclick="sliderFunction(noiseRatioSPD,'myRange-spd','pq-spd','messageSPD');" />
+						<p>
+							Value: <span id="slide-spd"></span>
+							<p id="messageSPD"></p>
+						</p>
+
+					</div>
+
+
+					<script>
+					var sliderSPD = document.getElementById("myRange-spd");
+					var outputSPD = document.getElementById("slide-spd");
+					outputSPD.innerHTML = sliderSPD.value;
+					
+					sliderSPD.oninput = function() {
+					  outputSPD.innerHTML = this.value;
+					}
+					</script>
+
+					<script>
+						var bSPD = res_params['spd']['branch'];
+						if(bSPD==1){
+							document.getElementById("sliderElem-spd").style.visibility = "visible";
+						}
+					</script>
+				</div>
+
+				<script>
+					graphSPD=res_params['spd']['graph'];
+			
+				</script>
+				<div id="pq-spd" class="pqContainer"
+					style="float: left; clear: left; visibility: hidden">
+					<h4>Candidate Orderings for samples generated using PQ trees</h4>
+					<h5>Enter the number of alternative orderings to display:</h5>
+					<td><input type="text" id="pqno-spd" maxlength="4" size="4"></td>
+					<td><input id="clickMe-spd" type="button" value="Compute"
+						onclick="computePQ(countsSPD,dPathSPD,graphSPD,'pqno-spd','pqorder-spd','orders-spd','pq-spd','myorderednetwork-spd','mynetwork-spd');" /></td>
+					<br>
+					<p id="totalPQ-spd"></p>
+					<br>
+					<p id="pqorder-spd"></p>
+					<br>
+					<!-- 				<div id="orders"></div> -->
+
+
+
+
+				</div>
+
+
+			</div>
+			
+			<div id="unknown" style="float:left;clear:left">
+				
+				<h4>Minimum Spanning Tree-</h4>
+				<div class="draw" id="mynetwork-un" style="visibility: visible"></div>
+				<div class="draw" id="myorderednetwork-un"
+					style="visibility: hidden; margin-top: -20em"></div>
+
+				<p id="demo"></p>
+				<input type="checkbox" id="ordered-un" name="treeview"
+						value="ordered" onclick="treeView('myorderednetwork-un','mynetwork-un','ordered-un')">Tree showing specific
+						order
+
+				<script>
+					
+					var xUN= res_params['spd']['edges'];
+					var labelsUN=res_params['spd']['labels'];
+					var countsUN = res_params['spd']['nodes'];
+					drawWithLabels(countsUN,xUN,dPathUN,labelsUN,"mynetwork-un");
+					drawWithoutLabels(countsUN,xUN,dPathUN,"myorderednetwork-un");
+				</script>
+
+
+				<script>
+				var noiseRatioUN= res_params['spd']['noise'];
+				var intensityRatioUN= res_params['spd']['intensity'];
+				</script>
+
+				<div class="pqContainer" style="float: left; clear: left">
+
+					<h4>
+						Noise Percentage: <input type="text" id="unNoise" style="border:0" /><br> Sampling intensity:
+						<input type="text" id="unIntensity" style="border:0" /><br> Select your threshold percent for noise:
+					</h4>
+					
+					<script>
+						document.getElementById("unNoise").value = noiseRatioUN;
+						document.getElementById("unIntensity").value = intensityRatioUN;
+					</script>
+					<div id="sliderElem-un" class="slidecontainer"
+						style="visibility: visible">
+
+						<input type="range" min="1" max="100" value="50" class="slider"
+							id="myRange-un" name="name_of_slider"> <input id="clickMe"
+							type="button" value="Compute"
+							onclick="sliderFunction(noiseRatioUN,'myRange-un','pq-un','messageUN');" />
+						<p>
+							Value: <span id="slide-un"></span>
+							<p id="messageUN"></p>
+						</p>
+
+					</div>
+
+
+					<script>
+					var sliderUN = document.getElementById("myRange-un");
+					var outputUN = document.getElementById("slide-un");
+					outputUN.innerHTML = sliderUN.value;
+					
+					sliderUN.oninput = function() {
+					  outputUN.innerHTML = this.value;
+					}
+					</script>
+
+					<script>
+						var bUN = res_params['spd']['branch'];
+						if(bUN==1){
+							document.getElementById("sliderElem-un").style.visibility = "visible";
+						}
+					</script>
+				</div>
+				<script>
+					graphUN=res_params['spd']['graph'];
+			
+				</script>
+
+				<div id="pq-un" class="pqContainer"
+					style="float: left; clear: left; visibility: hidden">
+					<h4>Candidate Orderings for samples generated using PQ trees</h4>
+					<h5>Enter the number of alternative orderings to display:</h5>
+					<td><input type="text" id="pqno-un" maxlength="4" size="4"></td>
+					<td><input id="clickMe-un" type="button" value="Compute"
+						onclick="computePQ(countsUN,dPathUN,graphUN,'pqno-un','pqorder-un','orders-un','pq-un','myorderednetwork-un','myorderednetwork-un');" /></td> <br>
+					<p id="totalPQ-un"></p>
+					<br>
+					<p id="pqorder-un"></p>
+					<br>
+					<!-- 				<div id="orders"></div> -->
+
+
+
+
+				</div>
+
+
+			</div>
+
+			<div id="pca-spd-outer" style="float:left;clear:left">
+				<h4>SPD</h4>
+				<!-- 			<canvas id="myChart1" width="600" height="400"></canvas> -->
+				<div class="pca" id="pca-spd" style="float: left; clear: left"></div>
+				<script>
+					getPCAForOrder(dPathSPD,"pca-spd");
+				</script>
+
+				<!-- 			<p id="message">{{msg}}</p> -->
+				
+
+
+			</div> 
+			
+			<div id="pca-unknown" style="float:left;clear:left">
+				<h4>Un</h4>
+				<!-- 			<canvas id="myChart1" width="600" height="400"></canvas> -->
+				<div class="pca" id="pca-un" style="float: left; clear: left"></div>
+				<script>
+				
+				getPCAForOrder(dPathUN,"pca-un");
+				</script>
+
+				
+
+			</div> 
+			
+			
+			
+		</div>
+		
+	</div>
+	
+		
+	
+	{% endblock %}
+</body>
+</html>

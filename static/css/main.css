@@ -135,12 +135,12 @@ h3 {
 	overflow: auto;
 	width: 100%;
 }
-#mynetwork,#myorderednetwork,#backbone{
+.draw{
 	width: 600px;
 	height: 400px;
 }
 
-#pca {
+.pca {
 	width: 800px;
 	height: 600px;
 	

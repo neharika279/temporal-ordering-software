@@ -2,11 +2,11 @@ var globalNodelist=[];
 var globalEdges=[];
 var globalDPath=[];
 
-function treeView(){//(nodes,edges,dPath,labels){
+function treeView(orderedDivName,divName,checkBoxName){//(nodes,edges,dPath,labels){
 	
-	var checkBox = document.getElementById("ordered");
-	var orderedDiv=document.getElementById("myorderednetwork");
-	var groupedDiv=document.getElementById("mynetwork");
+	var checkBox = document.getElementById(checkBoxName);
+	var orderedDiv=document.getElementById(orderedDivName);
+	var groupedDiv=document.getElementById(divName);
 	if (checkBox.checked == true) {
 		//drawWithoutLabels(nodes,edges,dPath);
 		groupedDiv.style.visibility="hidden";
@@ -21,7 +21,7 @@ function treeView(){//(nodes,edges,dPath,labels){
 	
 }
 
-function drawWithoutLabels(nodes,edges,dPath){
+function drawWithoutLabels(nodes,edges,dPath,orderedDivName){
 	//console.log("order tree");
 	//console.log(dPath);
 	globalNodelist=nodes;
@@ -112,7 +112,7 @@ function drawWithoutLabels(nodes,edges,dPath){
 	
 	var final_edges = new vis.DataSet(edge_dict);
 	// create a network
-	var container = document.getElementById('myorderednetwork');
+	var container = document.getElementById(orderedDivName);
 	
 	// provide the data in the vis format
 	var data = {
@@ -128,7 +128,7 @@ function drawWithoutLabels(nodes,edges,dPath){
 }
 
 
-function drawWithLabels(nodes,edges,dPath,labels){
+function drawWithLabels(nodes,edges,dPath,labels,divName){
 	//console.log("grouped tree");
 	colors = ["red","blue","green","yellow","orange","black"];
 	var dict = [];
@@ -199,7 +199,7 @@ function drawWithLabels(nodes,edges,dPath,labels){
 	
 	var final_edges = new vis.DataSet(edge_dict);
 	// create a network
-	var container = document.getElementById('mynetwork');
+	var container = document.getElementById(divName);
 	
 	// provide the data in the vis format
 	var data = {
@@ -437,23 +437,23 @@ function tableFunctIp(ipDict){
 	}
 }
 
-function displayPQ(nodeList,response) {
+function displayPQ(nodeList,response,pqOrderDivName,orderDivName,pqDivID,orderedDrawDiv,unorderedDrawDiv) {
 	
 	var res_response=JSON.parse(response);
 	var pqPaths=JSON.parse(res_response["pqranks"]);
 	var orders=JSON.parse(res_response["pqorders"]);
 	var pqArrayLen=Object.keys(pqPaths).length;
 	var arrStr = encodeURIComponent(JSON.stringify(nodeList));
-	var outerpara=document.getElementById("pq");
-	document.getElementById("pqorder").innerHTML="";
+	var outerpara=document.getElementById(pqDivID);
+	document.getElementById(pqOrderDivName).innerHTML="";
 	
-	if (document.contains(document.getElementById("orders"))) {
+	if (document.contains(document.getElementById(orderDivName))) {
 		//document.getElementById("submitbutton").remove();
-		var para=document.getElementById("orders");
+		var para=document.getElementById(orderDivName);
 		para.innerHTML = "";
 	}   else {
 		var para = document.createElement("div"); 
-		para.id = "orders";
+		para.id = orderDivName;
 		outerpara.appendChild(para);
 	}
 	
@@ -463,7 +463,7 @@ function displayPQ(nodeList,response) {
 	var br = document.createElement('br');
 	noneRadio.setAttribute("value", globalDPath);
 	noneRadio.setAttribute("name", "pqperms");
-	noneRadio.onclick = function(){ tempSaveOrder(); };
+	noneRadio.onclick = function(){ tempSaveOrder(pqOrderDivName,orderedDrawDiv,unorderedDrawDiv); };
 	
 	nonelabel.appendChild(noneRadio);
 	nonelabel.appendChild(document.createTextNode("Diameter Path"));
@@ -485,7 +485,7 @@ function displayPQ(nodeList,response) {
 		aTag.setAttribute("value", pqPaths[i]+"");
 		aTag.setAttribute("name", "pqperms");
 		//console.log(aTag.value);
-		aTag.onclick = function(){ tempSaveOrder(); };
+		aTag.onclick = function(){ tempSaveOrder(pqOrderDivName,orderedDrawDiv,unorderedDrawDiv); };
 		
 		label.appendChild(aTag);
 		label.appendChild(document.createTextNode("path"+(i+1)));
@@ -497,7 +497,7 @@ function displayPQ(nodeList,response) {
 	
 }
 
-function tempSaveOrder(){
+function tempSaveOrder(pqOrderDivName,orderedDrawDiv,unorderedDrawDiv){
 
 	order=document.querySelector('input[name="pqperms"]:checked').value
 	//console.log(order);
@@ -510,12 +510,12 @@ function tempSaveOrder(){
 	} 
 	//console.log(orderList);
 	document.getElementById('savedorder').value=order;
-	document.getElementById("pqorder").innerHTML=order;
+	document.getElementById(pqOrderDivName).innerHTML=order;
 	
-	drawWithoutLabels(globalNodelist,globalEdges,orderList);
+	drawWithoutLabels(globalNodelist,globalEdges,orderList,orderedDrawDiv);
 	
-	document.getElementById("mynetwork").style.visibility="hidden";
-	document.getElementById("myorderednetwork").style.visibility="visible";
+	document.getElementById(unorderedDrawDiv).style.visibility="hidden";
+	document.getElementById(orderedDrawDiv).style.visibility="visible";
 }
 
 function drawCurrentChart(order,nodeList){
@@ -606,29 +606,29 @@ function drawChart(order,nodeList){
 	});
 }
 
-function sliderFunction(noise){
+function sliderFunction(noise,sliderName,pqDivName,msgDivID){
 	
-	var slide = document.getElementById("myRange").value;
+	var slide = document.getElementById(sliderName).value;
 	//console.log(noise);
 	//console.log(slide);
 	
 	if (noise<slide){
 		
-		document.getElementById("msg").innerHTML="Noise ratio below threshold. Diameter path best order estimate";
+		document.getElementById(msgDivID).innerHTML="Noise ratio below threshold. Diameter path best order estimate";
 	}
 	else{
 		
-		document.getElementById("pq").style.visibility="visible";
+		document.getElementById(pqDivName).style.visibility="visible";
 		//displayPQ(counts,pqPerm,pqOrders);
 		
 	}
 	
 }
 
-function enteredOrdering(){
+function enteredOrdering(dim_divId,dist_divID,textID){
 	
 	//var graph_dict=JSON.parse(graph);
-	var ordering = String("["+document.getElementById("entered_order").value+"]");
+	var ordering = String("["+document.getElementById(textID).value+"]");
 	
 	post_data = {}
     post_data["order"] = ordering
@@ -641,7 +641,7 @@ function enteredOrdering(){
         type: 'POST',
         contentType:"text/json",  
         success: function(response){
-        	inPlaceAnalysis(response);
+        	inPlaceAnalysis(response,dim_divId,dist_divID);
         },
         error: function(error) {
             console.log(error);
@@ -649,12 +649,12 @@ function enteredOrdering(){
     });
 }
 
-function computePQ(counts,dpath,graph){
+function computePQ(counts,dpath,graph,pqTextName,pqOrderDivName,orderDivName,pqDivID,orderedDrawDiv,unorderedDrawDiv){
 	
 	//console.log(counts);
 	var graph_dict=JSON.parse(graph);
 	//console.log(graph_dict);
-	var pqnum = document.getElementById("pqno").value;
+	var pqnum = document.getElementById(pqTextName).value;
 	//console.log(pqnum)
 	post_data = {}
     post_data["pqnum"] = pqnum
@@ -667,7 +667,7 @@ function computePQ(counts,dpath,graph){
         type: 'POST',
         contentType:"text/json",  
         success: function(response){
-        	displayPQ(counts,response);
+        	displayPQ(counts,response,pqOrderDivName,orderDivName,pqDivID,orderedDrawDiv,unorderedDrawDiv);
         },
         error: function(error) {
             console.log(error);
@@ -676,7 +676,7 @@ function computePQ(counts,dpath,graph){
 	
 }
 
-function inPlaceAnalysis(response){
+function inPlaceAnalysis(response,dim_divID,dist_divID){
 	
 	//console.log(response);
 	var res_response=JSON.parse(response);
@@ -684,14 +684,14 @@ function inPlaceAnalysis(response){
 	var dimension=res_response["dimension_reading"];
 	var order=res_response["order"];
 	
-	showDimensions(dimRead,order);
-	drawDistMat(distmat);
+	showDimensions(dimension,order,dim_divID);
+	drawDistMat(distmat,dist_divID);
 	document.getElementById("changeDistMat").checked = false;
 }
 
 
 
-function showDimensions(dimRead,order){
+function showDimensions(dimRead,order,divID){
 	
 	//console.log(dimRead);
 	//console.log(order);
@@ -719,26 +719,12 @@ function showDimensions(dimRead,order){
 		data.push(trace);
 	}
 	
-	//console.log(data);
-	/*var trace1 = {
-			x: [1, 2, 3, 4],
-			y: [10, 15, 13, 17],
-			type: 'scatter'
-		};
 		
-		var trace2 = {
-			x: [1, 2, 3, 4],
-			y: [16, 5, 11, 9],
-			type: 'scatter'
-		};
-		
-	var data = [trace1, trace2];*/
-		
-	Plotly.newPlot('dimension', data);	
+	Plotly.newPlot(divID, data);	
 	
 }
 
-function drawDistMat(distmat){
+function drawDistMat(distmat,divID){
 	
 	var data = [
 		{
@@ -748,10 +734,10 @@ function drawDistMat(distmat){
 		}
 	];
 
-	Plotly.newPlot('distmat', data);
+	Plotly.newPlot(divID, data);
 }
 
-function getPCAForOrder(order){
+function getPCAForOrder(order,pcaDivID){
 	
 	var ordering = String("["+String(order)+"]");
 	
@@ -767,7 +753,7 @@ function getPCAForOrder(order){
         contentType:"text/json",  
         success: function(response){
         	//console.log(response);
-        	drawPCA(response);
+        	drawPCA(response,pcaDivID);
         },
         error: function(error) {
             console.log(error);
@@ -776,7 +762,7 @@ function getPCAForOrder(order){
 	
 }
 
-function drawPCA(response){
+function drawPCA(response,pcaDivID){
 	
 	var chartData=[];
 	var res_response=JSON.parse(response);
@@ -802,7 +788,7 @@ function drawPCA(response){
 	data.push(trace);*/
 	
 	
-	Plotly.plot('pca', [{
+	Plotly.plot(pcaDivID, [{
 	  type: 'scatter3d',
 	  //mode: 'lines',
 	  x: data[0],
@@ -820,26 +806,26 @@ function drawPCA(response){
 	//Plotly.plot('pca',data);
 }
 
-function dimensionChange(order,distmat){
+function dimensionChange(order,distmat,distDivID){
 	
 	var checkBox = document.getElementById("changeDistMat");
 	var ordering = String("["+String(order)+"]");
 	
 	if (checkBox.checked == true) {
 		
-		drawTransposedMatrix(ordering)
+		drawTransposedMatrix(ordering,distDivID)
 		//newDistMat=(distmat[0].map((col, i) => distmat.map(row => row[i])));
 		//console.log(newDistMat);
 		//drawDistMat(newDistMat);
 	}
 	else if(checkBox.checked == false){
-		console.log(distmat);
-		drawDistMat(distmat);
+		//console.log(distmat);
+		drawDistMat(distmat,distDivID);
 	}
 	
 }
 
-function drawTransposedMatrix(order){
+function drawTransposedMatrix(order,distDivID){
 	
 	post_data = {}
     post_data["order"] = order
@@ -850,10 +836,10 @@ function drawTransposedMatrix(order){
         type: 'POST',
         contentType:"text/json",  
         success: function(response){
-        	console.log(response)
+        	//console.log(response)
         	var res_response=JSON.parse(response);
         	var distmat=res_response["distmat"];
-        	drawDistMat(distmat);
+        	drawDistMat(distmat,distDivID);
         },
         error: function(error) {
             console.log(error);
@@ -861,6 +847,88 @@ function drawTransposedMatrix(order){
     });
 	
 }
+
+function getAnalysisValues(mst_dpath,cst_dpath,spd_dpath,un_dpath){
+	
+	var leftDiv = document.getElementById("analysis_all_left");
+	var rightDiv = document.getElementById("analysis_all_right");
+	
+	leftDiv.style.visibility="visible";
+	rightDiv.style.visibility="visible";
+	
+	post_data = {};
+    post_data["mst_dpath"] = mst_dpath;
+    post_data["cst_dpath"] = cst_dpath;
+    post_data["spd_dpath"] = spd_dpath;
+    post_data["un_dpath"] = un_dpath;
+    
+    $.ajax({
+        url: '/get_analyze_all_parameters',
+        data:JSON.stringify(post_data),
+        type: 'POST',
+        contentType:"text/json",  
+        success: function(response){
+        	//console.log(response)
+        	drawAnalysisAll(response,mst_dpath,cst_dpath,spd_dpath,un_dpath);
+        },
+        error: function(error) {
+            console.log(error);
+        }
+    });
+	
+	
+	
+}
+
+function drawAnalysisAll(response,mst_dpath,cst_dpath,spd_dpath,un_dpath){
+	
+	var res_response=JSON.parse(response);
+	
+	var distmat_unordered=res_response["distmat_unordered"];
+	var distmat_mst=res_response["distmat_mst"];
+	var distmat_cst=res_response["distmat_cst"];
+	var distmat_spd=res_response["distmat_spd"];
+	var distmat_un=res_response["distmat_un"];
+	var unordered_list=res_response["unordered_list"];
+	
+	drawDistMat(distmat_unordered,'distmat-unordered');
+	drawDistMat(distmat_mst,'distmat-mst');
+	drawDistMat(distmat_cst,'distmat-cst');
+	drawDistMat(distmat_spd,'distmat-spd');
+	drawDistMat(distmat_un,'distmat-un');
+	
+	
+	var dimread_unordered=res_response["dimension_reading_unordered"];
+	var dimread_mst=res_response["dimension_reading_mst"];
+	var dimread_cst=res_response["dimension_reading_cst"];
+	var dimread_spd=res_response["dimension_reading_spd"];
+	var dimread_un=res_response["dimension_reading_un"];
+	
+
+	showDimensions(dimread_unordered,unordered_list,'dimension-unordered');
+	showDimensions(dimread_mst,mst_dpath,'dimension-mst');
+	showDimensions(dimread_cst,cst_dpath,'dimension-cst');
+	showDimensions(dimread_spd,spd_dpath,'dimension-spd');
+	showDimensions(dimread_un,un_dpath,'dimension-un');
+}
+
+
+/*function allParamsProcess(params){
+	
+	var res_params=JSON.parse(params);
+	console.log(res_params);
+	mstParams=res_params['mst'];
+	
+	drawWithLabels(mstParams['nodes'],mstParams['edges'],mstParams['dpath'],mstParams['labels'],"mynetwork-mst");
+	drawWithoutLabels(mstParams['nodes'],mstParams['edges'],mstParams['dpath'],"myorderednetwork-mst");
+	document.getElementById("mstNoise").innerHTML = mstParams['noise'] ;
+	document.getElementById("mstIntensity").innerHTML = mstParams['intensity'] ;
+	
+	cstParams=res_params['cst'];
+	spdParams=res_params['spd'];
+	
+	
+}*/
 
 function isEmpty(obj) {
     for(var key in obj) {

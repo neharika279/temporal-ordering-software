@@ -26,23 +26,26 @@
 		<div class='leftDiv'>
 			<h4>Minimum Spanning Tree</h4>
 			
-			<div id="mynetwork" style="visibility: visible"></div>
-			<div id="myorderednetwork" style="visibility: hidden; margin-top: -20em"></div>
-			
+			<div class="draw" id="mynetwork" style="visibility: visible"></div>
+			<div class="draw" id="myorderednetwork" style="visibility: hidden; margin-top: -20em"></div>
+
 			<p id="demo"></p>
 			<tr>
 				<td><input type="checkbox" id="ordered" name="treeview"
-					value="ordered" onclick="treeView()">Tree showing specific order</td>
-<!-- 				<td><input type="radio" id="ordered" name="treeview" -->
-<!-- 					value="ordered">Tree showing specific order</td> -->
+					value="ordered"
+					onclick="treeView('myorderednetwork','mynetwork','ordered')">Tree
+					showing specific order</td>
+				<!-- 				<td><input type="radio" id="ordered" name="treeview" -->
+				<!-- 					value="ordered">Tree showing specific order</td> -->
 			</tr>
+
 
 			<script>
 				var x= {{ edges|tojson }};
 				var labels={{ labels_info|tojson }};
 				var counts = {{ nodes|tojson }};
-				drawWithLabels(counts,x,dPath,labels);
-				drawWithoutLabels(counts,x,dPath);
+				drawWithLabels(counts,x,dPath,labels,"mynetwork");
+				drawWithoutLabels(counts,x,dPath,"myorderednetwork");
 			</script>
 
 			<div id="spdDiv" class="pqContainer"
@@ -94,7 +97,7 @@
 				<div id="sliderElem" class="slidecontainer" style="visibility:visible">
 			    	
 			    	<input type="range" min="1" max="100" value="50" class="slider" id="myRange" name="name_of_slider">
-			    	<input id="clickMe" type="button" value="Compute" onclick="sliderFunction(noiseRatio);" />
+			    	<input id="clickMe" type="button" value="Compute" onclick="sliderFunction(noiseRatio,'myRange','pq','message');" />
 			  		<p>Value: <span id="slide"></span></p>
 			  		
 				</div>
@@ -124,13 +127,12 @@
 		<div id="chart" class="rightDiv">
 			<h4>Ordering of samples</h4>
 <!-- 			<canvas id="myChart1" width="600" height="400"></canvas> -->
-				<div id="pca" style="float:left;clear:left"></div>
+				<div class="pca" id="pca" style="float:left;clear:left"></div>
 			<script>
-				var order= {{ ordering|tojson }};
-				getPCAForOrder(dPath);
+				getPCAForOrder(dPath,"pca");
 			</script>
 			
-			<p id="message">{{msg}}</p>
+<!-- 			<p id="message">{{msg}}</p> -->
 			<script>
 					graph={{mstgraph|tojson}};
 			
@@ -140,7 +142,7 @@
 				<h4>Candidate Orderings for samples generated using PQ trees</h4>
 				<h5>Enter the number of alternative orderings to display:</h5>
 				<td><input type="text" id="pqno" maxlength="4" size="4"></td>
-				<td><input id="clickMe" type="button" value="Compute" onclick="computePQ(counts,dPath,graph);" /></td><br>
+				<td><input id="clickMe" type="button" value="Compute" onclick="computePQ(counts,dPath,graph,'pqno','pqorder','orders','pq','myorderednetwork','mynetwork');" /></td><br>
 				<p id="totalPQ"></p><br>
 				<p id="pqorder"></p><br>
 <!-- 				<div id="orders"></div> -->
