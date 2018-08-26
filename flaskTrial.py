@@ -51,7 +51,7 @@ def home():
         
         session['label']=request.form['labeloptions']
         session['filetype']=request.form['options']
-        
+        session['method']=request.form['methodoptions']
         
         if 'file' not in request.files:
             flash('No file part')
@@ -70,7 +70,10 @@ def home():
             file.save(filePath)
             #return redirect(url_for('uploaded_file',filename=filename))
             #return render_template('method_select.html',value=filename,option=option,label_option=label_option)
-            return render_template('method_select.html')
+           
+            return redirect(url_for('exec_method'))
+            
+            #return render_template('method_select.html')
     
     else:
         return render_template('home.html')
@@ -110,6 +113,9 @@ def pq_trees(filename,filetype):
 
 @app.route("/clusterMST",methods=['GET', 'POST'])
 def clusterMST():
+    
+    method=session['method']
+    
     if request.method == 'POST':
         param_dict={}
         #filePath=os.path.join(app.config['UPLOAD_FOLDER'], filename)
@@ -117,8 +123,16 @@ def clusterMST():
         param_dict["c"]= float(request.form["c"])
         param_dict["p"]= float(request.form["p"])
         param_dict["mod"]= int(request.form["mod"])
+        
+        print "took parameters. param dict::"
+        print param_dict
+        
         p_dict=json.dumps(param_dict)
-        return redirect(url_for('exec_clusterMST',param_dict=p_dict))
+        
+        if(method=='all'):
+            return redirect(url_for('exec_all',param_dict=p_dict))
+        else:
+            return redirect(url_for('exec_clusterMST',param_dict=p_dict))
     
     else:
         
@@ -134,126 +148,114 @@ def cluster_ordering():
         return render_template('cluster_ordering.html')
 
 
-@app.route('/mstUploads')
-def exec_mst():
+
+
+@app.route('/exec_method')
+def exec_method():
     
-    msg=""
-    progMat=[[]]
-    pq_orderings={}
+    method_type=session['method']
+    
+    if(method_type=='mst'):
+        return redirect(url_for('exec_mst'))
+    elif(method_type=='cst'):
+        return redirect(url_for('exec_clusterOrdering'))
+    else:
+        return redirect(url_for('clusterMST')) 
+    
+@app.route('/exec_all/<param_dict>')    
+def exec_all(param_dict):
+    
+    all_param={}
+    print "reached exec all method"
+    mst_branch,mst_graph,mst_progMat,mst_labels_info,mst_dPath,mst_nodes,mst_e,mst_noise,mst_intensity=getSerialization("mst", param_dict)
+    cst_branch,cst_graph,cst_progMat,cst_labels_info,cst_dPath,cst_nodes,cst_e,cst_noise,cst_intensity=getSerialization("cst", param_dict)
+    spd_branch,spd_graph,spd_progMat,spd_labels_info,spd_dPath,spd_nodes,spd_e,spd_noise,spd_intensity=getSerialization("spd", param_dict)
+    
+    all_param['mst']={'branch':mst_branch,'graph':mst_graph,'progmat':mst_progMat,'labels':mst_labels_info,'dpath':mst_dPath,'nodes':mst_nodes,'edges':mst_e,
+                      'noise':mst_noise,'intensity':mst_intensity}
+    
+    all_param['cst']={'branch':cst_branch,'graph':cst_graph,'progmat':cst_progMat,'labels':cst_labels_info,'dpath':cst_dPath,'nodes':cst_nodes,'edges':cst_e,
+                      'noise':cst_noise,'intensity':cst_intensity}
+    
+    all_param['spd']={'branch':spd_branch,'graph':spd_graph,'progmat':spd_progMat,'labels':spd_labels_info,'dpath':spd_dPath,'nodes':spd_nodes,'edges':spd_e,
+                      'noise':spd_noise,'intensity':spd_intensity}
+    
+   
+    
+    params=json.dumps(all_param)
+    return render_template('results_all.html',params=params)
+
+
+def getSerialization(method_name,param_dict):
+    
+    progMat=[]
     input_dict={}
     filename=session['filepath']
     filetype=session['filetype']
     labeltype=session['label']
-    
+     
     dataset=ex.readFromFile(filename, filetype, labeltype)
-    dPath,edges,mst,branch,label_dict=ex.executeBasicMST(dataset)
+    
+    if(method_name=="mst"):
+    
+        dPath,edges,mst,branch,label_dict=ex.executeBasicMST(dataset)
+    
+    elif(method_name=="cst"):
+        
+        dPath,edges,label_dict,mst,branch=ex.cst(dataset)
+        
+    elif(method_name=="spd"):
+        
+        dPath,edges,label_dict,progMat,mst,branch=ex.spd(dataset,param_dict)
+        
+     
     
     dataset=np.array(dataset)
-    
     labels_info=json.dumps(label_dict)
-    
+     
     mst={int(k):{int(i):float(j) for i,j in v.items()} for k,v in mst.items()}
     mst_graph=json.dumps(mst)
-    
+     
     dPath=[int(i) for i in dPath]
-    
+     
     e,nodes=ex.get_nodes_and_edges(edges)
-    ordering=ex.get_complete_ordering(dPath,mst)
-    
-    o=json.dumps(ordering)
-    
+    #ordering=ex.get_complete_ordering(dPath,mst)
+     
+    #o=json.dumps(ordering)
+     
     noise,intensity=ex.get_path_stats(mst)
-    
-    
+     
+     
     for i in range(len(dataset)):
         #print i
         temp_list=list(dataset[i])
         temp_list=[float(x) for x in temp_list]
         input_dict[i]=temp_list
+        
+    return branch,mst_graph,progMat,labels_info,dPath,nodes,e,noise,intensity
+
+
+@app.route('/mstUploads')
+def exec_mst():
     
-    return render_template('results.html',branch=branch,mstgraph=mst_graph,progMat=progMat,mtd="mst", labels_info=labels_info,value=dPath,nodes=nodes,edges=e,ordering=o,noise=noise,intensity=intensity,filename=filename,filetype=filetype,msg=msg)
+    param_dict={}
+    branch,mst_graph,progMat,labels_info,dPath,nodes,e,noise,intensity=getSerialization("mst",param_dict)
+    return render_template('results.html',branch=branch,mstgraph=mst_graph,progMat=progMat,mtd="mst", labels_info=labels_info,value=dPath,nodes=nodes,edges=e,noise=noise,intensity=intensity)
     #return send_from_directory(app.config['UPLOAD_FOLDER'],filename)
     
-@app.route("/noiseThreshold/<filename>/<filetype>/<noise>", methods=["POST"])
-def noiseThreshold(filename,filetype,noise):
-    
-    msg=""
-    pq_orderings={}
-    dPath,edges,mst=ex.executeBasicMST(filename,filetype)
-    dPath=[int(i) for i in dPath]
-    e,nodes=ex.get_nodes_and_edges(edges)
-    ordering=ex.get_complete_ordering(dPath,mst)
-    o=json.dumps(ordering)
-    noise,intensity=ex.get_path_stats(filename, filetype)
-
-    slider_value= request.form["name_of_slider"]
-    
-    
-    if float(noise)<float(slider_value):
-        
-        msg="Noise ratio below threshold. Diameter path best order estimate"
-        
-        return render_template('results.html', value=dPath,nodes=nodes,edges=e,ordering=o,noise=noise,intensity=intensity,filename=filename,filetype=filetype,msg=msg)
-    else:
-        
-        pq_ranks=exec_pq_trees(filename, filetype)
-        pq=json.dumps(pq_ranks)
-        
-        #print ""
-        #print "pq ranks:"
-        
-        for o in range (len(pq_ranks)):
-            print pq_ranks[o]
-            pq_orderings[o]=ex.get_complete_ordering(pq_ranks[o],mst)
-            
-        print ""
-        print "ordering for each option::"
-        print pq_orderings
-        pq_orders=json.dumps(pq_orderings)
-        return render_template('resultspq.html',value=dPath,nodes=nodes,edges=e,ordering=o,noise=noise,intensity=intensity,filename=filename,filetype=filetype,msg=msg,pq=pq,pq_orders=pq_orders)
-    #return slider_value
             
 @app.route('/clusterMSTUploads/<param_dict>')    
 def exec_clusterMST(param_dict):
     
-    mtd="spd"
-    o={}
-    msg=""
-    filename=session['filepath']
-    filetype=session['filetype']
-    labeltype=session['label']
-    dataset=ex.readFromFile(filename, filetype, labeltype)
-    
-    dpath,edges,label_dict,progMat,graph,branch=ex.spd(dataset,param_dict)
-    
-    result_graph=json.dumps(graph)
-    noise,intensity=ex.get_path_stats(graph)
-    
-    labels_info=json.dumps(label_dict)
-    e,nodes=ex.get_nodes_and_edges(edges)
-    
-    return render_template('results.html',branch=branch,mstgraph=result_graph,progMat=progMat,mtd=mtd,labels_info=labels_info,value=dpath,nodes=nodes,edges=e,ordering=o,noise=noise,intensity=intensity,filename=filename,filetype=filetype,msg=msg)
+    branch,mst_graph,progMat,labels_info,dPath,nodes,e,noise,intensity=getSerialization("spd", param_dict)
+    return render_template('results.html',branch=branch,mstgraph=mst_graph,progMat=progMat,mtd="spd",labels_info=labels_info,value=dPath,nodes=nodes,edges=e,noise=noise,intensity=intensity)
 
 @app.route('/clusterOrderingUploads')    
 def exec_clusterOrdering():
     
-    progMat=[[]]
-    o={}
-    noise=0
-    intensity=0
-    msg=""
-    filename=session['filepath']
-    filetype=session['filetype']
-    labeltype=session['label']
-    dataset=ex.readFromFile(filename, filetype, labeltype)
-    
-    dpath,edges,label_dict,graph,branch=ex.cst(dataset)
-    
-    result_graph=json.dumps(graph)
-    noise,intensity=ex.get_path_stats(graph)
-    labels_info=json.dumps(label_dict)
-    e,nodes=ex.get_nodes_and_edges(edges)
-    return render_template('results.html',branch=branch,mstgraph=result_graph,progMat=progMat,mtd="cst",labels_info=labels_info,value=dpath,nodes=nodes,edges=e,ordering=o,noise=noise,intensity=intensity,filename=filename,filetype=filetype,msg=msg)
+    param_dict={}
+    branch,mst_graph,progMat,labels_info,dPath,nodes,e,noise,intensity=getSerialization("spd", param_dict)
+    return render_template('results.html',branch=branch,mstgraph=mst_graph,progMat=progMat,mtd="cst",labels_info=labels_info,value=dPath,nodes=nodes,edges=e,noise=noise,intensity=intensity)
 
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
@@ -281,6 +283,8 @@ def analyze(ordering,mstgraph):
     order=ex.parse_order(ordering)
     order=list(int(k) for k in order)
     
+    distmat_unordered,dimension_reading_unordered,unordered=get_unordered_analysis_data()
+    
     alpha=ex.readFromFile(filepath, filetype, labeltype)
     graph=ast.literal_eval(mstgraph)
     graph_new={int(k):{int(i):float(j) for i,j in v.items()} for k,v in graph.items()}
@@ -298,7 +302,104 @@ def analyze(ordering,mstgraph):
     #print "bacnkbone:"
     #print backbone
  
-    return render_template('analyzeResults.html',orderDistMat=distmat,dimRead=dimension_reading,order=order,nodes=nodes,edges=e,backbone=backbone,d_i=di_json)
+    return render_template('analyzeResults.html',orderDistMat=distmat,dimRead=dimension_reading,order=order,nodes=nodes,edges=e,backbone=backbone,d_i=di_json,
+                           unordered=unordered,distmat_unordered=distmat_unordered,dimension_reading_unordered=dimension_reading_unordered)
+
+
+def get_unordered_analysis_data():
+    
+    unordered=[]
+    filepath=session['filepath']
+    filetype=session['filetype']
+    labeltype=session['label']
+    
+    alpha=ex.readFromFile(filepath, filetype, labeltype)
+    dataset=np.array(alpha)
+    
+    for i in range(len(dataset)):
+        unordered.append(i)
+
+    distmat_unordered=ex.get_order_dist_mat(dataset, unordered)
+    dimension_reading_unordered=ex.get_order_dimension_readings(dataset, unordered)
+    
+    
+    return distmat_unordered,dimension_reading_unordered,unordered
+    
+
+@app.route('/analyze_all/<params>') 
+def analyze_all(params):
+    
+    filepath=session['filepath']
+    filetype=session['filetype']
+    labeltype=session['label']
+    
+    params_new=ast.literal_eval(params)
+    
+    mst_dpath=params_new["mst"]["dpath"]
+    mst_dpath=[int(i) for i in mst_dpath]
+    
+    cst_dpath=params_new["cst"]["dpath"]
+    cst_dpath=[int(i) for i in cst_dpath]
+    
+    spd_dpath=params_new["spd"]["dpath"]
+    spd_dpath=[int(i) for i in spd_dpath]
+    
+    un_dpath=params_new["spd"]["dpath"]
+    un_dpath=[int(i) for i in un_dpath]
+
+    return render_template('analyze_all.html',mst_dpath=mst_dpath,cst_dpath=cst_dpath,spd_dpath=spd_dpath,un_dpath=un_dpath)
+
+
+@app.route('/get_analyze_all_parameters', methods=['POST']) 
+def get_analyze_all_parameters():
+    
+    filepath=session['filepath']
+    filetype=session['filetype']
+    labeltype=session['label']
+    alpha=ex.readFromFile(filepath, filetype, labeltype)
+    dataset=np.array(alpha)
+    
+    distmat_unordered,dimension_reading_unordered,unordered=get_unordered_analysis_data();
+    
+    request_data = json.loads(request.data)
+    mst_dpath = request_data["mst_dpath"]
+    cst_dpath = request_data["cst_dpath"]
+    spd_dpath = request_data["spd_dpath"]
+    un_dpath = request_data["un_dpath"]
+    
+
+    distmat_mst=ex.get_order_dist_mat(dataset, mst_dpath)
+    dimension_reading_mst=ex.get_order_dimension_readings(dataset, mst_dpath)
+    
+    distmat_cst=ex.get_order_dist_mat(dataset, cst_dpath)
+    dimension_reading_cst=ex.get_order_dimension_readings(dataset, cst_dpath)
+    
+    distmat_spd=ex.get_order_dist_mat(dataset, spd_dpath)
+    dimension_reading_spd=ex.get_order_dimension_readings(dataset, spd_dpath)
+    
+    distmat_un=ex.get_order_dist_mat(dataset, un_dpath)
+    dimension_reading_un=ex.get_order_dimension_readings(dataset, un_dpath)
+    
+    response_data={}
+    
+    response_data["unordered_list"]=unordered
+    response_data["distmat_unordered"]=distmat_unordered
+    response_data["dimension_reading_unordered"]=dimension_reading_unordered
+    
+    response_data["distmat_mst"]=distmat_mst
+    response_data["dimension_reading_mst"]=dimension_reading_mst
+    
+    response_data["distmat_cst"]=distmat_cst
+    response_data["dimension_reading_cst"]=dimension_reading_cst
+    
+    response_data["distmat_spd"]=distmat_spd
+    response_data["dimension_reading_spd"]=dimension_reading_spd
+    
+    response_data["distmat_un"]=distmat_un
+    response_data["dimension_reading_un"]=dimension_reading_un
+    
+    return json.dumps(response_data)
+
 
 @app.route('/pca', methods=['POST'])
 def get_pca():
@@ -441,4 +542,4 @@ if __name__ == '__main__':
     app.config['SESSION_TYPE'] = 'filesystem'
  
     #session.init_app(app)
-    app.run(debug=False)
+    app.run(debug=True)

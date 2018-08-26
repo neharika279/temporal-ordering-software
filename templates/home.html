@@ -24,7 +24,7 @@
 		a function of time.
 		</p>
 		
-		<form method=post enctype=multipart/form-data>
+		<form method=post enctype=multipart/form-data target="_blank">
       		<p><input type=file name=file><br>
       		Select file type uploaded:<br>
       		<tr>
@@ -38,7 +38,17 @@
       			<td><input type="radio" name="labeloptions" id="option4" value="label"> With Labels </input></td>
       		</tr><br>
 			
-        	<input type=submit value="Upload and Select Method"></p>
+			
+			Choose a method:<br>
+      		<tr>
+      			<td><input type="radio" name="methodoptions" id="option5" value="mst"> Minimum Spanning Tree </input></td>
+      			<td><input type="radio" name="methodoptions" id="option6" value="spd"> Progression Discovery (needs parameter tuning) </input></td>
+      			<td><input type="radio" name="methodoptions" id="option7" value="cst"> Cluster Spanning Trees </input></td>
+      			<td><input type="radio" name="methodoptions" id="option8" value="all"> Compare all methods </input></td>
+      		</tr><br>
+			
+			
+        	<input type=submit value="Upload and Use Method"></p>
     	</form>
 		
 	</div>

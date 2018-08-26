@@ -24,12 +24,22 @@
 			<script>
 			var distmat={{orderDistMat|tojson}};
 			var order={{order|tojson}};
+			var unordered={{unordered|tojson}};
+			var distmat_unordered={{distmat_unordered|tojson}};
+			var dimension_reading_unordered={{dimension_reading_unordered|tojson}};
 			</script>
+			
+			<h4>Unordered</h4>
+			<div id="distmatUnordered"></div>
+			<input type="checkbox" id="changeDistMatUnordered" name="treeview"
+					value="ordered" onclick="dimensionChange(unordered,distmat_unordered,'distmatUnordered')">View distance matrix for dimensions across all data samples
+			
+			<h4>Ordered</h4>
 			<div id="distmat"></div>
 			<input type="checkbox" id="changeDistMat" name="treeview"
-					value="ordered" onclick="dimensionChange(order,distmat)">View distance matrix for dimensions across all data samples
+					value="ordered" onclick="dimensionChange(order,distmat,'distmat')">View distance matrix for dimensions across all data samples
 			<h4>Indecisive Backbone for the Diameter Path - Basis for computation of alternative orderings</h4>
-			<div id="backbone" style="clear: left"></div>
+			<div class="draw" id="backbone" style="clear: left"></div>
 			<script>
 				
 				var nodes={{nodes|tojson}};
@@ -41,7 +51,8 @@
 				
 				drawBackbone(nodes,edges,backbone,di);
 				
-				drawDistMat(distmat);
+				drawDistMat(distmat_unordered,'distmatUnordered');
+				drawDistMat(distmat,'distmat');
 				
 				
 			</script>
@@ -52,22 +63,31 @@
 		<div id="chart" class="rightDiv">
 			<h4>Dimensions</h4>
 			
+			<h4>Unordered</h4>
+			<div id="dimensionUnordered" style="width:100%;float:left"></div>
+			
+			<script>
+				showDimensions(dimension_reading_unordered,unordered,'dimensionUnordered');
+			</script>
+			
+			
+			<h4>Ordered</h4>
 			<div id="dimension" style="width:100%;float:left"></div>
 			
 			<script>
-				showDimensions(dimRead,order);
+				showDimensions(dimRead,order,'dimension');
 			</script>
 			
 		<div id="enter_ordering" style="float: left;clear: left">
 			<h5>Enter ordering:</h5>
 			<td><input type="text" id="entered_order"></td>
-			<td><input id="analyze_order" type="button" value="Analyze" onclick="enteredOrdering();" /></td><br>
+			<td><input id="analyze_order" type="button" value="Analyze" onclick="enteredOrdering('dimension','distmat','entered_order');" /></td><br>
 		
 		</div>	
 		
 		</div>
 	
-		
+	</div>
 	
 	{% endblock %}
 </body>
