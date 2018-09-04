@@ -262,17 +262,6 @@ def uploaded_file(filename):
     print "in upload file method"
     return send_from_directory(app.config['UPLOAD_FOLDER'],filename)
 
-
-@app.route('/displayResultsPQ/<dPath>/<pq_perm>/<edges>')
-def displayResultsPQ(dPath,pq_perm,edges,chartID = 'chart_ID', chart_type = 'spline', chart_height = 500):
-    node_list=session.pop('node_list', [])
-    
-    chart = {"renderTo": chartID, "type": chart_type, "height": chart_height,}
-    series = [{"data": eval(dPath)}]
-    title = {"text": 'Time Order'}
-    xAxis = {}#{"labels":{"enabled":False}}
-    yAxis = {"title": {"text": 'yAxis Label'}}
-    return render_template('resultspq.html', chartID=chartID, chart=chart, series=series, title=title, xAxis=xAxis, yAxis=yAxis, value=dPath,nodes=node_list,pq=pq_perm,edges=edges)
  
 @app.route('/analyze/<ordering>/<mstgraph>') 
 def analyze(ordering,mstgraph):
@@ -304,6 +293,7 @@ def analyze(ordering,mstgraph):
  
     return render_template('analyzeResults.html',orderDistMat=distmat,dimRead=dimension_reading,order=order,nodes=nodes,edges=e,backbone=backbone,d_i=di_json,
                            unordered=unordered,distmat_unordered=distmat_unordered,dimension_reading_unordered=dimension_reading_unordered)
+
 
 
 def get_unordered_analysis_data():

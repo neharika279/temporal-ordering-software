@@ -170,7 +170,13 @@ def get_path_stats(resultGraph):
     #alpha=readFromFile(filepath, filetype)
     
     diamPath,diamLength=mop.getDiameterPath(resultGraph,0)
+#     print "diamPath,diamLength"
+#     print diamPath
+#     print diamLength
     branch,branchList=findBranch(resultGraph, diamPath)
+#     print "branch,branchlist:"
+#     print branch
+#     print branchList
     
     if branch==1:
         noise_to_signal_ratio=mop.calc_noise_ratio(resultGraph, branchList)
@@ -310,7 +316,6 @@ def spd(dataset,param_dict):
     param = json.loads(param_dict)
     print param.get('L')
     
-    
     if(dataset.rownames!=None):
         
         label_dict=get_label_dict(dataset.rownames)
@@ -320,22 +325,24 @@ def spd(dataset,param_dict):
     
     dataset = stats.zscore(dataset)
     dataset = np.nan_to_num(dataset)
-    path,newmst,progMat=csp.run_spd(dataset, "euclidean", param.get('L'), param.get('c'), param.get('p'), param.get('mod'))
-    
+    dpath,graph,progMat=csp.run_spd(dataset, "euclidean", param.get('L'), param.get('c'), param.get('p'), param.get('mod'))
+     
     result_progMat=list(list(d) for d in progMat)
-    newmst=newmst.toarray()
-    graph=get_dict(newmst)
+    
+    #newmst=newmst.toarray()
+    #graph=get_dict(newmst)
+    
     spd_edges=mop.graph.edges(graph)
     
-    temp_list=[]
-    for p in path:
-        a,b=p
-        if a not in temp_list:
-            temp_list.append(int(a)) 
-        if b not in temp_list:
-            temp_list.append(int(b))
-    
-    dpath=temp_list
+#     temp_list=[]
+#     for p in path:
+#         a,b=p
+#         if a not in temp_list:
+#             temp_list.append(int(a)) 
+#         if b not in temp_list:
+#             temp_list.append(int(b))
+#     
+#     dpath=temp_list
     #branch,branchList=findBranch(graph, dpath)
     branch=1
     return dpath,spd_edges,label_dict,result_progMat,graph,branch
