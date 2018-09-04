@@ -8,6 +8,7 @@ from consensus_kmeans import consensus_kmeans
 import random
 from helper_functions import get_diameter_path
 import path
+import matrixOperations as mop
 
 
 def run_spd(data,affinity,L,c1,p_thresh,mod_size_cutoff):
@@ -16,12 +17,6 @@ def run_spd(data,affinity,L,c1,p_thresh,mod_size_cutoff):
     #p_thresh = .002;
     #mod_size_cutoff = 5;
     labels,clusters =  consensus_kmeans(data,L,c1,affinity)
-    print ""
-    print "labels:"
-    print labels
-    print ""
-    print "clusters:"
-    print clusters
 
     msts = []
     dist_mats = []    
@@ -38,10 +33,10 @@ def run_spd(data,affinity,L,c1,p_thresh,mod_size_cutoff):
     #print concordance_table
 
     similar_progressions,indices = compute_similar_progressions(concordance_table,msts,p_thresh)
-    #print ""
-    #print "similar progressions:"
-    #print similar_progressions
-    print type(similar_progressions)
+#     print ""
+#     print "similar progressions:"
+#     print similar_progressions
+    #print type(similar_progressions)
     
     included_clusters = indices[-mod_size_cutoff:]
     
@@ -52,10 +47,20 @@ def run_spd(data,affinity,L,c1,p_thresh,mod_size_cutoff):
     new_data = data[:,data_indices]
     
     new_dists = pairwise_distances(new_data,metric=affinity)
-    new_mst = minimum_spanning_tree(new_dists)
+    #print "new_dists"
+    #print new_dists
     
-    path = get_diameter_path(new_mst)
-    return path,new_mst,similar_progressions
+    graph_dict_mst=mop.getMST(range(len(new_dists)),new_dists)
+    #print "dict of dict mst:"
+    #print graph_dict_mst
+    
+    diamPath,diamLength=mop.getDiameterPath(graph_dict_mst,0)
+    #print "diam path by basic mst method:"
+    #print diamPath
+
+    #new_mst = minimum_spanning_tree(new_dists)
+    #path = get_diameter_path(new_mst)
+    return diamPath,graph_dict_mst,similar_progressions
 
 def compute_similar_progressions(concordance_table,msts,p_thresh):
     concordant = concordance_table <= p_thresh
@@ -105,27 +110,3 @@ def statistical_concordance(mst,dist):
     d = stats.norm(loc=np.mean(distances), scale = np.std(distances))
     p = d.cdf(mst_dist)
     return p
-
-
-    
-    
-    
-    
-def test_run_spd():
-    data_file = "finalExpr.csv"
-    affinity = "euclidean"
-    linkage = "average"    
-    data =  np.loadtxt(fname = data_file, delimiter = ',')
-    data = stats.zscore(data)
-    data = np.nan_to_num(data)
-    #data = [[0,1],[0,2],[0,4],[0,3]]
-    
-    path,mst=run_spd(data,affinity,10,0.5,0.5,5)
-    print ""
-    print "path:"
-    print path
-    print "new mst:"
-    print mst
-    
-    
-#test_run_spd()

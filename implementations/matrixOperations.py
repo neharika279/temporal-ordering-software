@@ -80,6 +80,10 @@ def pperm_shallow(pnode):
     return list(permute_iter(pnode))
 
 def pqtree_perms(seq):
+    print "seq"
+    print seq
+    print "type of seq elements:"
+    print type(seq[0][0][0])
     stack = [seq[:]]
     ischanging = True
     while ischanging:
@@ -91,12 +95,9 @@ def pqtree_perms(seq):
                     perms = pperm_shallow(s[i])
                     if len(perms) > 1:
                         for perm in perms:
-                            
-                            #perm=[tuple(x) for x in perm]
-                            #t=[tuple(y) for y in list(s[i])]
-                            
-                            #if np.not_equal(perm,list(s[i])):
-                            if perm != list(s[i]):
+                                                       
+                            list_s=list(s[i])                                    
+                            if perm != list_s:
                                 stack.append(s[:i] + perm + s[i+1:])
                                 stack[j] = s[:i] + s[i] + s[i+1:] 
                     else:
@@ -117,6 +118,40 @@ def pqtree_perms(seq):
     return stack
 
 
+def get_int_values_for_pqnodes(seq):
+    
+    #print "incoming seq:"
+    #print type(seq)
+    if isinstance(seq, Qnode):
+        seq=tuple(seq)
+        seq=get_int_values_for_pqnodes(seq)
+                
+    elif isinstance(seq, Pnode):
+        seq=list(seq)
+        seq=get_int_values_for_pqnodes(seq)
+    
+    else:
+        for i in seq:
+            if isinstance(i, Qnode):
+                i=get_int_values_for_pqnodes(i)
+                
+            elif isinstance(i, Pnode):
+                i=get_int_values_for_pqnodes(i)   
+            
+            
+            else:
+                if isinstance(i, tuple):
+                    i=(int(x) for x in i)
+                elif isinstance(i, list):
+                    i=[int(y) for y in i]
+                else:
+                    i=int(i)
+    
+    #print "exterior seq:"
+    #print type(seq[0])
+    #print "interior perm:"
+    #print type(seq[0][0])    
+    return seq
 
 def getGraph():
     
@@ -501,13 +536,27 @@ def make_pqtree(mstree):
     """
     # find diameter path
     diampath, dpl = getDiameterPath(mstree)
-
+    print "diampath:"
+    print diampath
+    print "type of diampath:"
+    print type(diampath)
+    print "type of diampath elements:"
+    print type(diampath[0])
+    
+    diampath=[int(d) for d in diampath]
     # find indecisive backbone
     backbone = indecisive_backbone(mstree, diampath)
+#     print "backbone:"
+#     print backbone
+#     print "type of backbone:"
+#     print type(diampath)
+#     print "type of backbone elements:"
+#     print type(backbone[0])
 
     if backbone is None:
         return Qnode(diampath)
-
+    
+    backbone=[int(b) for b in backbone]
     # find diampath branches
     dpbranches = diameterpath_branches(mstree, backbone)
 
@@ -585,13 +634,15 @@ def calc_noise_ratio(graph,branch_list):
     
     keys=graph.keys()
     MST_points=len(keys)
-    
+    print "MST points:"
+    print MST_points
     branch_points=0
     
     for sublist in branch_list:
         for sub_sub_list in sublist:
             branch_points += len(sub_sub_list)
-   
+    print "branch points:"
+    print branch_points
     return float(round(((branch_points/MST_points)*100),2))
 
 
