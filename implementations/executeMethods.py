@@ -201,7 +201,8 @@ def executePQtree(filePath,filetype,labeltype,mst_graph,dpath,pqno):
         pqTree=None
     else:
         print"branch exists"
-        perm_list=[[]]
+        perm_list=[]
+        total_perm_list=[]
         pqtree = mop.make_pqtree(mst_graph)
         
         pqperm = mop.pqtree_perms(pqtree)
@@ -211,15 +212,17 @@ def executePQtree(filePath,filetype,labeltype,mst_graph,dpath,pqno):
         for i in range(pqno):
             #print i, rpaths.paths[i], rpaths.lengths[i]
             perm_list.append(list(reversed(rpaths.paths[i])))     
-     
-    perm_list.pop(0)
+        
+        for j in range(total_paths):
+            #print i, rpaths.paths[i], rpaths.lengths[i]
+            total_perm_list.append(list(reversed(rpaths.paths[j])))     
      
     l=len(perm_list)
     for i in range(l):
         curr_perm=[int(k) for k in perm_list[i]]
         perm_dict[i]=curr_perm
          
-    return perm_dict,total_paths
+    return perm_dict,total_paths,total_perm_list
 
 
 def executeClusterMST(dataSet):#(filePath,filetype):
@@ -350,16 +353,16 @@ def spd(dataset,param_dict):
 
 def get_order_dist_mat(dataset,ordering):
     
-    parsed_order=parse_order(ordering)
+    #parsed_order=parse_order(ordering)
     
-    ordering_matrix=[[]]
+    ordering_matrix=[]
    
  
-    for orderno in parsed_order:
+    for orderno in ordering:
         
         ordering_matrix.append(dataset[orderno])
     
-    ordering_matrix.pop(0)
+    
     ordering_matrix=np.array(ordering_matrix)
     
     distmat=get_distance_mat(ordering_matrix)
@@ -388,13 +391,12 @@ def parse_order(ordering):
 
 def get_order_dimension_readings(dataset,ordering):
 
-    order_dimension_readings=[[]]
-    parsed_order=parse_order(ordering)
+    order_dimension_readings=[]
+    #parsed_order=parse_order(ordering)
     
-    for orderno in parsed_order:
+    for orderno in ordering:
         order_dimension_readings.append(dataset[orderno])
     
-    order_dimension_readings.pop(0)
     trans_order_dimension=np.transpose(order_dimension_readings)
     
     trans_order_dimension=list(list(float(d) for d in r) for r in trans_order_dimension)
