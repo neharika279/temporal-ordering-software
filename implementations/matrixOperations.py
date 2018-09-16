@@ -536,13 +536,6 @@ def make_pqtree(mstree):
     """
     # find diameter path
     diampath, dpl = getDiameterPath(mstree)
-    print "diampath:"
-    print diampath
-    print "type of diampath:"
-    print type(diampath)
-    print "type of diampath elements:"
-    print type(diampath[0])
-    
     diampath=[int(d) for d in diampath]
     # find indecisive backbone
     backbone = indecisive_backbone(mstree, diampath)
