@@ -21,7 +21,7 @@ from implementations.executeMethods import get_indecisive_backbone,\
 
 UPLOAD_FOLDER = 'C:\Users\Public'
 #FILE_NAME=''
-ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif','csv'])
+ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif','csv','fas','fasta'])
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -99,8 +99,8 @@ def clusterMSTFinal(methodName):
         param_dict["p"]= float(request.form["p"])
         param_dict["mod"]= int(request.form["mod"])
         
-        print "took parameters. param dict::"
-        print param_dict
+        #print "took parameters. param dict::"
+        #print param_dict
         
         p_dict=json.dumps(param_dict)
         
@@ -115,15 +115,32 @@ def exec_method_final(method):
     print "method:"
     print method
     param_dict={}
+    param_dict["L"]= 10
+    param_dict["c"]= 0.8
+    param_dict["p"]= 0.002
+    param_dict["mod"]= 5
     param_json = json.dumps(param_dict)
     if(method=='mst'):
         return render_template('finalResults.html',paramDict=param_json,method_name=method)
     elif(method=='cst'):
         return render_template('finalResults.html',paramDict=param_json,method_name=method)
-    else:
-        return redirect(url_for('clusterMSTFinal',methodName=method))
+    elif(method=='spd'):
+        return render_template('finalResults.html',paramDict=param_json,method_name=method)
+    elif(method=='all'):
+        return render_template('finalResults_new.html',paramDict=param_json,method_name=method)
 
 
+################################################################Trial results page render#####################################################################
+@app.route('/render_results_new')
+def render_results_new():
+    return render_template('results_new.html')
+
+
+@app.route('/render_results_final_new')
+def render_results_final_new():
+    return render_template('finalResults_new.html')
+    
+    
 
 @app.route('/get_serialization_values',methods=['POST'])
 def get_serialization_values():
@@ -131,9 +148,8 @@ def get_serialization_values():
     request_data = json.loads(request.data)
     param_dict = request_data["param_dict"]
     method_name=request_data["method_name"]
-    print "recieved method name:"
-    print method_name
-    
+#     print "recieved method name:"
+#     print method_name
     response_data={}
     mst_values={}
     cst_values={}
@@ -329,6 +345,13 @@ def analyze_final(order,graph):
     
     distmat=ex.get_order_dist_mat(dataset, order)
     dimension_reading=ex.get_order_dimension_readings(dataset, order)
+    #print "order:"
+    #print order
+    #print np.array(dimension_reading)
+    #print "number of rows:"
+    #print len(dimension_reading)
+    #print "number of dimensions:"
+    #print len(dimension_reading[0])
     backbone=get_indecisive_backbone(graph_new,order)
     di=get_decisive_indecisive_nodes(graph_new)
     

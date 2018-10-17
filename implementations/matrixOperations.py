@@ -4,13 +4,18 @@ Created on 30-Sep-2017
 @author: Neharika Mazumdar
 '''
 from __future__ import division
+from Bio import SeqIO
+import sys,re,os
 import csv,copy
 import numpy as np
 from scipy.sparse.csgraph import minimum_spanning_tree
 import graphFunctions as graph
 import random
+from scipy.spatial.distance import hamming
+from sklearn.manifold import MDS
+import sequence_distance as seq
 
-
+UPLOAD_FOLDER = 'C:\Users\Public'
 def path_length(path, distmtx, seglengths=None):
     """path, distance matrix -> length of path (optional: segment lengths)
     
@@ -168,6 +173,82 @@ def getGraph():
 #     print "shape:"
     return arrRow
 
+
+def parseSequenceFile(filePath):
+    
+    if not filePath.endswith("fas") and not filePath.endswith('fasta') and not filePath.endswith('fa'):
+            #print(input)
+            sys.exit("Warning! The above file may not be in fasta format. Exiting")
+    else:
+        print filePath
+        seqs=parseInput(filePath,False)
+        print "type of seqs:"
+        print type(seqs[0])
+    
+    
+    seq_hamming_matrix=get_hamming_dist(seqs)
+    #print "seqs parsed:"
+    #print seqs
+    #print "hamming matrix shape:"
+    #print np.array(seq_hamming_matrix).shape
+    
+    embedding = MDS(n_components=10)
+    MDS_fix_matrix=embedding.fit_transform(seq_hamming_matrix)
+    
+    #print "MDS result"
+    #print MDS_fix_matrix
+    #print "array shape:"
+    #print np.array(MDS_fix_matrix).shape
+    
+    filePath=os.path.join(UPLOAD_FOLDER, "temp_MDS_file.txt")
+    f = open(filePath, "w")
+    
+    for row in MDS_fix_matrix:
+        for item in row:
+            f.write('%s' % item)
+            f.write("\t")
+        f.write("\n")
+    f.close()
+    
+    alpha = tableasrows(filePath,"\t", autoconvert=True, hasrownames=False)
+    
+    return alpha
+        
+        
+def parseInput(input_file,freq): #get sequences from a file
+    if not freq:
+        seqs=[]    
+        with open(input_file) as input_handle:
+            for record in SeqIO.parse(input_handle, "fasta"): 
+                seqs.append(record.seq)
+        
+    else:
+        seqs={}
+        with open(input_file,'r') as f:
+            for record in SeqIO.parse(f,'fasta'):
+                freq = int(re.findall('_(\d*)$', record.id)[0])
+                seqs[record.seq]=freq
+                
+    
+    return seqs
+
+
+def get_hamming_dist(seqs):
+    
+    l=len(seqs)
+    seq_hamming_matrix=np.zeros([l,l],float) 
+    
+    for i in range(l):
+        for j in range(l):
+            #seq_hamming_matrix[i][j]=hamming(str(seqs[i]), str(seqs[j]))
+            seq_hamming_matrix[i][j]=seq.hamming_distance(str(seqs[i]), str(seqs[j]))
+     
+    print "hamming matrix:"
+    print seq_hamming_matrix   
+    return seq_hamming_matrix
+        
+
+
 def tableasrows (filename, delimiter, commentchar="#", skipinitialspace=True,
                 hasheader=False, hasrownames=False,
                 autoconvert=False, na=False, nastring="NA", navalue=-999):
@@ -194,6 +275,14 @@ def tableasrows (filename, delimiter, commentchar="#", skipinitialspace=True,
         if hasrownames:
             rownames.append(row[0])
             row = row[1:]
+            
+            for r in range(len(row)):
+                if row[r]=="":
+                    row[r]=0.0
+        else:
+            for r in range(len(row)):
+                if row[r]=="":
+                    row[r]=0.0
             
         if autoconvert:
             try:    # see if it's an int

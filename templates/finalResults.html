@@ -17,11 +17,8 @@
 	<div class='standard'>
 		<h1>Results</h1><br>
 		<button id="compute_results" class="button" style="float:right" onclick="computeResultsFinal(paramDict,methodName);">Compute Values</button>
-<!-- 		<a href="/get_file/" target="blank"><button class='btn btn-default'>Download!</button></a> -->
-<!-- 		<a href="jellyrolltest1.txt" download> -->
-			<a href = {{ url_for('download_file',filename='results.txt') }}>Download</a>
-<!-- 			<button>Download</button> -->
-		</a>
+		<a href = {{ url_for('download_file',filename='results.txt') }}>Download</a>
+		<a href={{ url_for('render_results_new') }}>new results</a>
 		<script>
 			var paramDict = {{paramDict|tojson}};
 			var methodName = '{{method_name}}';
@@ -131,6 +128,7 @@
 						<br>
 					</div>
 				</div>
+				<div style="clear:both;"></div>
 			</div>
 		</div>
 
