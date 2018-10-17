@@ -73,19 +73,19 @@ def test_run_pq():
 #     print "type of original pqtree:"
 #     print type(pqtree)
 
-    dataset1=ex.readFromFile(data_file_parasite, 'option2', 'nolabel')
-    dPath1,edges1,mst1,branch1,label_dict1=ex.executeBasicMST(dataset1)
+    #dataset1=ex.readFromFile(data_file_parasite, 'option2', 'nolabel')
+    #dPath1,edges1,mst1,branch1,label_dict1=ex.executeBasicMST(dataset1)
     
-    pqtree1=mop.make_pqtree(mst1)
+    #pqtree1=mop.make_pqtree(mst1)
     
-    print "pqtree1:"
-    print pqtree1
+    #print "pqtree1:"
+    #print pqtree1
     
     
-    if pqtree != pqtree1:
-        print "unequal"
-    else:
-        print "equal" 
+    #if pqtree != pqtree1:
+        #print "unequal"
+    #else:
+        #print "equal" 
     
     
 #     pqtree=mop.get_int_values_for_pqnodes(pqtree)

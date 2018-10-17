@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1"> 
+<script type="text/javascript" src="{{url_for('static',filename='vis.min.js')}}"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+<script src="http://code.highcharts.com/highcharts.js"></script>
+<link href="{{ url_for('static', filename='vis.min.css') }}" rel="stylesheet" type="text/css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.6.0/Chart.min.js"></script>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script type="text/javascript" src="{{url_for('static',filename='draw.js')}}"></script>
+<script type="text/javascript" src="{{url_for('static',filename='jquery.js')}}"></script>
+</head>
+<body>
+
+	{% extends "layout.html" %} 
+	{% block content %}
+
+	<script>
+			var paramDict = {{paramDict|tojson}};
+			var methodName = '{{method_name}}';
+	</script>
+	<div style="text-align: center">
+		<h1>Results</h1>
+	</div>
+	<button id="compute_results" class="button" style="float:right" onclick="computeResultsFinal(paramDict,methodName);">Compute Values</button>
+	<a href = {{ url_for('download_file',filename='results.txt') }}>Download Results</a>
+	<button class="collapsible">View Unordered Data</button>
+	<div class="content">
+		<input id="saved_unordered" name="order" type="hidden">
+		<div class='leftDiv' id='resultsLeftAnalysis1'>
+			<div class="draw" id="distmat_unordered"
+				style="float: left; clear: left"></div>
+			<input type="checkbox" id="changeDistMatUnordered" name="treeview"
+				value="ordered"
+				onclick="drawTransposedMatrix('distmat_unordered','saved_unordered','changeDistMatUnordered')">
+			View distance matrix for dimensions across all data samples
+		</div>
+		<div id="resultsRightAnalysis1" class="rightDiv">
+			<div class="draw" id="dimension_unordered"
+				style="float: left; clear: left"></div>
+		</div>
+	</div>
+
+	<!-- Three columns -->
+	<div class="row">
+		<div id="mst_column" class="column" onclick="openTab('mst1');">
+			<p>MST</p>
+			<div class="drawSmaller" id="myorderednetworkthumb1"></div>
+		</div>
+		<div id="cst_column" class="column" onclick="openTab('mst2');">
+			<p>CST</p>
+			<div class="drawSmaller" id="myorderednetworkthumb2"></div>
+		</div>
+		<div id="spd_column" class="column" onclick="openTab('mst3');">
+			<p>SPD</p>
+			<div class="drawSmaller" id="myorderednetworkthumb3"></div>
+		</div>
+		
+		<script>
+			$(function () {
+			    $("#mst_column").click(function () {
+			        $(this).css('background-color', '#f5f5f0');
+			        $("#cst_column").css('background-color', '');
+			        $("#spd_column").css('background-color', '');
+			    });
+			    
+			    $("#cst_column").click(function () {
+			        $(this).css('background-color', '#f5f5f0');
+			        $("#mst_column").css('background-color', '');
+			        $("#spd_column").css('background-color', '');
+			    });
+			    
+			    $("#spd_column").click(function () {
+			        $(this).css('background-color', '#f5f5f0');
+			        $("#cst_column").css('background-color', '');
+			        $("#mst_column").css('background-color', '');
+			    });
+			});
+		</script>
+	</div>
+
+	<!-- Full-width columns: (hidden by default) -->
+	<div id="mst1" class="containerTab" style="display: none; background: #f5f5f0">
+		<span onclick="this.parentElement.style.display='none'"
+			class="closebtn">&times;</span>
+		<input id="savedorder1" name="order" type="hidden"> <input
+			type="hidden" id="mstmethod1">
+		
+		<div class="row">
+			<div class="column">
+				<p id="mstLabel1"></p>
+				<div class="drawSmall" id="mynetwork1" style="visibility: visible"></div>
+				<div class="drawSmall" id="myorderednetwork1" style="visibility: hidden; margin-top: -22em"></div>
+				<p id="demo"></p>
+				<input type="checkbox" id="ordered1" name="treeview" value="ordered"
+					onclick="treeView('myorderednetwork1','mynetwork1','ordered1')" style="clear:left">Tree
+				showing specific order
+			</div>
+			<div class="column">
+				<p id="pcaLabel1"></p>
+				<div class="drawSmall" id="distmat1"></div>
+				<input type="checkbox" id="changeDistMat1" name="treeview"
+					value="ordered"
+					onclick="drawTransposedMatrix('distmat1','savedorder1','changeDistMat1')">View
+				distance matrix for dimensions across all data samples
+			</div>
+			<div class="column">
+				<p>Parameter Tuning</p>
+				<h4>
+					Noise Percentage: <input type="text" id="noise1" style="border: 0" /><br>
+					Sampling intensity: <input type="text" id="intensity1"
+						style="border: 0" /><br> Select your threshold percent for
+					noise:
+				</h4>
+				<div id="sliderElem1" class="slidecontainer"
+					style="visibility: visible">
+					<input type="range" min="1" max="100" value="50" class="slider"
+						id="myRange1" name="name_of_slider"> <input type="hidden"
+						id="hiddenNoise"> <input id="clickMeSlider1" type="button"
+						value="Compute"
+						onclick="sliderFunction('noise1','myRange1','pq1','message1');" />
+					<p>
+						Value: <span id="slide1"></span>
+					<p id="message1"></p>
+				</div>
+				<script>
+					var sliderMST1 = document.getElementById("myRange1");
+					var outputMST1 = document.getElementById("slide1");
+					outputMST1.innerHTML = sliderMST1.value;
+					
+					sliderMST1.oninput = function() {
+					  outputMST1.innerHTML = this.value;
+					}
+				</script>
+				<div id="pq1" class="pqContainer"
+						style="float: left; clear: left; visibility: hidden">
+						<h4>Candidate Orderings for samples generated using PQ trees</h4>
+						<h5>Enter the number of alternative orderings to display:</h5>
+						<td><input type="text" id="pqno1" maxlength="4" size="4"></td>
+						<td><input id="clickMePQ1" type="button" value="Compute"
+							onclick="computePQFinal(paramDict,'mstmethod1','pqno1','pqorder1','orders1','pq1','myorderednetwork1','mynetwork1','pca1','distmat1',
+				'dimension1','changeDistMat1','savedorder1');" /></td>
+						<br>
+						<p id="totalPQ1"></p>
+						<br>
+						<p id="pqorder1"></p>
+						<br>
+				</div>
+		</div>
+
+	</div>
+		<button class="collapsible">View Extra Analysis</button>
+		<div class="content">
+			<div class='leftDiv' id='resultsLeftAnalysis1'>
+				<div class="draw" id="pca1" style="float: left; clear: left"></div>
+				<button class="collapsible">View Indecisive Backbone</button>
+				<div class="content">
+					<p>Indecisive Backbone for the Diameter Path - Basis for
+						computation of alternative orderings
+					<p>
+					<div class="draw" id="backbone1" style="float: left; clear: left"></div>
+				</div>
+			</div>
+			<div id="resultsRightAnalysis1" class="rightDiv">
+				<div class="draw" id="dimension1" style="float: left; clear: left"></div>
+			</div>
+		</div>
+	</div>
+
+	<div id="mst2" class="containerTab" style="display: none; background: #f5f5f0">
+		<span onclick="this.parentElement.style.display='none'"
+			class="closebtn">&times;</span>
+		<input id="savedorder2" name="order" type="hidden"> 
+		<input type="hidden" id="mstmethod2">
+		
+		<div class="row">
+			<div class="column">
+				<p id="mstLabel2"></p>
+				<div class="drawSmall" id="mynetwork2" style="visibility: visible"></div>
+				<div class="drawSmall" id="myorderednetwork2" style="visibility: hidden; margin-top: -22em"></div>
+				<p id="demo"></p>
+				<input type="checkbox" id="ordered2" name="treeview" value="ordered"
+					onclick="treeView('myorderednetwork2','mynetwork2','ordered2')" style="clear:left">Tree
+				showing specific order
+			</div>
+			<div class="column">
+				<p id="pcaLabel2"></p>
+				<div class="drawSmall" id="distmat2"></div>
+				<input type="checkbox" id="changeDistMat2" name="treeview"
+					value="ordered"
+					onclick="drawTransposedMatrix('distmat2','savedorder2','changeDistMat2')">View
+				distance matrix for dimensions across all data samples
+			</div>
+			<div class="column">
+				<p>Parameter Tuning</p>
+			</div>
+
+		</div>
+		<button class="collapsible">View Extra Analysis</button>
+		<div class="content">
+			<div class='leftDiv' id='resultsLeftAnalysis2'>
+				<div class="draw" id="pca2" style="float: left; clear: left"></div>
+			</div>
+			<div id="resultsRightAnalysis2" class="rightDiv">
+				<div class="draw" id="dimension2" style="float: left; clear: left"></div>
+			</div>
+		</div>			
+	</div>
+	
+<!-- 	spd -->
+	<div id="mst3" class="containerTab" style="display: none; background: #f5f5f0">
+	
+		<span onclick="this.parentElement.style.display='none'"
+			class="closebtn">&times;</span>
+		<input id="savedorder3" name="order" type="hidden"> <input
+			type="hidden" id="mstmethod3">
+		
+		<div class="row">
+			<div class="column">
+				<p id="mstLabel3"></p>
+				<div class="drawSmall" id="mynetwork3" style="visibility: visible"></div>
+				<div id="myorderednetwork3" class="drawSmall" style="visibility: hidden; margin-top: -22em"></div>
+				<p id="demo"></p>
+				<input type="checkbox" id="ordered3" name="treeview" value="ordered"
+					onclick="treeView('myorderednetwork3','mynetwork3','ordered3')" style="clear:left">Tree
+				showing specific order
+			</div>
+			<div class="column">
+				<p id="pcaLabel3"></p>
+				<div class="drawSmall" id="distmat3"></div>
+				<input type="checkbox" id="changeDistMat3" name="treeview"
+					value="ordered"
+					onclick="drawTransposedMatrix('distmat3','savedorder3','changeDistMat3')">View
+				distance matrix for dimensions across all data samples
+			</div>
+			<div class="column">
+				<p>Parameter Tuning</p>
+				<td><p>Number of Iterations for consensus clustering:</p>
+					<span id="Lslide"></span>
+				</td>
+				<td>
+					<div id="spdslider" class="slidecontainer"
+					style="visibility: visible">
+						<input type="range" min="1" max="100" value="10" class="slider"
+							id="Lslider" name="L_slider">  	 
+					</div>
+					
+				</td><br>
+				<td>
+					<p>Clustering Threshold:</p>
+					<span id="Cslide"></span>
+				</td>
+				<td>
+					<div id="spdslider" class="slidecontainer"
+					style="visibility: visible">
+						<input type="range" min="0" max="1" value="0.8" step="0.1" class="slider"
+							id="Cslider" name="C_slider">  	
+					</div>
+				</td>
+				<td>
+					<p>P-value for concordance measure:</p>
+					<span id="Pslide"></span>
+				</td>
+				<td>
+					<div id="spdslider" class="slidecontainer"
+					style="visibility: visible">
+						<input type="range" min="0" max="1" value="0.002" step="0.001" class="slider"
+							id="Pslider" name="P_slider">  	 
+					</div>
+				</td>
+				<td>
+					<p>Number of modules</p>
+				</td>
+				<td>
+					<input type="text" id="mod_num" name="mod" maxlength="4" size="4" value="5">
+				</td>
+				<input id="spd_slider_click" type="button" value="Recompute"
+							onclick="spdSliderFunction(3);" />
+				<script>
+					var sliderL = document.getElementById("Lslider");
+					var outputL = document.getElementById("Lslide");
+					outputL.innerHTML = sliderL.value;
+					
+					var sliderC = document.getElementById("Cslider");
+					var outputC = document.getElementById("Cslide");
+					outputC.innerHTML = sliderC.value;
+					
+					var sliderP = document.getElementById("Pslider");
+					var outputP = document.getElementById("Pslide");
+					outputP.innerHTML = sliderP.value;
+					
+					sliderL.oninput = function() {
+					  outputL.innerHTML = this.value;
+					}
+					
+					sliderC.oninput = function() {
+					  outputC.innerHTML = this.value;
+					}
+					
+					sliderP.oninput = function() {
+					  outputP.innerHTML = this.value;
+					}
+				</script>
+			</div>
+
+		</div>
+		<button class="collapsible">View Extra Analysis</button>
+		<div class="content">
+			<div class='leftDiv' id='resultsLeftAnalysis3'>
+				<div class="draw" id="pca3" style="float: left; clear: left"></div>
+				<button id="progMatButton3" class="collapsible" style="display:none">View Progression Similarity Matrix</button>
+				<div class="content">
+					<div class="draw" id="progmat3" style="float: left; clear: left"></div>
+				</div>
+			</div>
+			<div id="resultsRightAnalysis3" class="rightDiv">
+				<div class="draw" id="dimension3" style="float: left; clear: left"></div>
+			</div>
+		</div>
+
+	</div>
+
+	<script>
+		function openTab(tabName) {
+		  var i, x;
+		  x = document.getElementsByClassName("containerTab");
+		  for (i = 0; i < x.length; i++) {
+		     x[i].style.display = "none";
+		  }
+		  document.getElementById(tabName).style.display = "block";
+		}
+	</script>
+
+	<script>
+		var coll = document.getElementsByClassName("collapsible");
+		var i;
+		
+		for (i = 0; i < coll.length; i++) {
+		  coll[i].addEventListener("click", function() {
+		    this.classList.toggle("active");
+		    var content = this.nextElementSibling;
+		    if (content.style.display === "block") {
+		      content.style.display = "none";
+		    } else {
+		      content.style.display = "block";
+		    }
+		  });
+		}
+	</script>
+
+	{% endblock %}
+</body>
+</html>

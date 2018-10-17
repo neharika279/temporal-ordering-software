@@ -93,6 +93,8 @@ def executeBasicMST(alpha):
     
     distMat=get_distance_mat(alpha)
     resultGraph=mop.getMST(range(len(distMat)),distMat)
+    print "result graph:"
+    print resultGraph
     diamPath,diamLength=mop.getDiameterPath(resultGraph,0)
     
     edges=mop.graph.edges(resultGraph)
@@ -159,6 +161,13 @@ def readFromFile(filePath,filetype,labeltype):
             alpha = mop.tableasrows(filePath,",", autoconvert=True, hasrownames=False)
         elif(labeltype=='label'):
             alpha = mop.tableasrows(filePath,",", autoconvert=True, hasrownames=True)
+            
+    elif(filetype=='option3'):
+        #print 'found fasta file'
+        alpha=mop.parseSequenceFile(filePath)
+        #print "returned alpha"
+        #print alpha
+       
     else:
         return -1
     return alpha

@@ -206,6 +206,18 @@ function drawPCA(response,pcaDivID){
 	}
 	data.push(trace);*/
 	
+	var layout = {
+			autosize: false,
+			width: 500,
+			height: 300,
+			margin: {
+		    l: 50,
+		    r: 10,
+		    b: 25,
+		    t: 20,
+		    pad: 4
+			}
+		};
 	
 	Plotly.newPlot(pcaDivID, [{
 	  type: 'scatter3d',
@@ -219,7 +231,7 @@ function drawPCA(response,pcaDivID){
 	    color: "yellow",
 	    reversescale: false
 	  }
-	}]);
+	}],layout);
 	
 }
 
@@ -416,6 +428,26 @@ function sliderFunction(noiseInputName,sliderName,pqDivName,msgDivID){
 		//displayPQ(counts,pqPerm,pqOrders);
 		
 	}
+}
+
+
+function spdSliderFunction(divNum){
+	
+	var slideL = document.getElementById('Lslider').value;
+	var slideC = document.getElementById('Cslider').value;
+	var slideP = document.getElementById('Pslider').value;
+	var num_mod=document.getElementById('mod_num').value;
+	
+	var param_dict = {}; // create an empty array
+
+	param_dict["L"] = parseInt(slideL);
+	param_dict["c"] = parseFloat(slideC);
+	param_dict["p"] = parseFloat(slideP);
+	param_dict["mod"] = parseInt(num_mod);
+	
+	param_dict_string=JSON.stringify(param_dict);
+	
+	recomputeResults(param_dict_string,'spd',divNum);
 }
 
 /*function enteredOrdering(dim_divId,dist_divID,textID){
@@ -621,12 +653,26 @@ function showDimensions(dimRead,order,divID){
 		var trace= {
 				x:xaxis,
 				y:dimRead[j],
-				type: 'scatter'
+				type: 'scattergl'
 		};
 		
 		data.push(trace);
 	}
-	Plotly.newPlot(divID, data);	
+	
+	var layout = {
+			autosize: false,
+			width: 500,
+			height: 300,
+			margin: {
+		    l: 50,
+		    r: 10,
+		    b: 25,
+		    t: 20,
+		    pad: 4
+			}
+		};
+	
+	Plotly.newPlot(divID, data,layout);	
 }
 
 function drawDistMat(distmat,divID){
@@ -638,8 +684,20 @@ function drawDistMat(distmat,divID){
 		    type: 'heatmap'
 		}
 	];
+	var layout = {
+		autosize: false,
+		width: 400,
+		height: 300,
+		margin: {
+	    l: 50,
+	    r: 10,
+	    b: 25,
+	    t: 20,
+	    pad: 4
+		}
+	};
 
-	Plotly.newPlot(divID, data);
+	Plotly.newPlot(divID, data,layout);
 }
 
 
@@ -798,6 +856,7 @@ function drawAnalysisFinal(response,distmatDiv,dimensionDiv,backboneDiv,ordering
 /**********************************************NEW METHODS***************************************************/
 function computeResultsFinal(paramDict,methodName){
 	//console.log(methodName);
+	//console.log(typeof paramDict);
 	post_data = {};
     post_data["param_dict"] = paramDict;
     post_data["method_name"] = methodName;
@@ -818,14 +877,43 @@ function computeResultsFinal(paramDict,methodName){
 }
 
 
+
+function recomputeResults(paramDict,methodName,divNum){
+	//console.log(methodName);
+	//console.log(typeof paramDict);
+	post_data = {};
+    post_data["param_dict"] = paramDict;
+    post_data["method_name"] = methodName;
+    
+    $.ajax({
+    	url: '/get_serialization_values',
+    	data:JSON.stringify(post_data),
+    	type: 'POST',
+    	contentType:"text/json",  
+    	success: function(response){
+    		//console.log(response)
+    		var res_response=JSON.parse(response);
+    		addDataToDivision(res_response,methodName,divNum);
+    	},
+    	error: function(error) {
+    		console.log(error);
+    	}
+    });
+}
+
+
 function drawResultsFinal(response){
 	
 	var res_response=JSON.parse(response);
-	console.log(res_response);
+	//console.log(res_response);
 	var methodName=res_response["method_name"];
 	populateUnorderedAnalysis();
 	
 	if(methodName==="all"){
+		
+		drawThumbnails(res_response,"mst",1);
+		drawThumbnails(res_response,"cst",2);
+		drawThumbnails(res_response,"spd",3);
 		
 		addDataToDivision(res_response,"mst",1);
 		addDataToDivision(res_response,"cst",2);
@@ -839,6 +927,18 @@ function drawResultsFinal(response){
 	
 }
 
+function drawThumbnails(parsed_response,methodName,divNum){
+	
+	var methodValues=parsed_response[methodName];
+	var dpath=methodValues["dpath"];
+	var nodes=methodValues["nodes"];
+	var edges=methodValues["edges"];
+	
+	var thumbDiv = document.getElementById("myorderednetworkthumb"+String(divNum));
+	thumbDiv.style.display="block";
+	
+	drawWithoutLabels(nodes,edges,dpath,"myorderednetworkthumb"+String(divNum));
+}
 
 function addDataToDivision(res_response,methodName,divNumber){
 	
@@ -862,17 +962,26 @@ function addDataToDivision(res_response,methodName,divNumber){
 	var hiddenInput = document.getElementById("mstmethod"+String(divNumber));
 	var treeLabel = document.getElementById("mstLabel"+String(divNumber));
 	var pcaLabel = document.getElementById("pcaLabel"+String(divNumber));
-	var noiseVal = document.getElementById("noise"+String(divNumber));
-	var intensityVal = document.getElementById("intensity"+String(divNumber));
-	var tempOrder=document.getElementById("savedorder"+String(divNumber));
-	var progMatButton=document.getElementById("progMatButton"+String(divNumber));
 	
-	mainDiv1.style.display="block";
+	if(methodName==="mst"){
+		var noiseVal = document.getElementById("noise"+String(divNumber));
+		var intensityVal = document.getElementById("intensity"+String(divNumber));
+	}
+	
+	var tempOrder=document.getElementById("savedorder"+String(divNumber));
+	if(methodName==="spd"){
+		var progMatButton=document.getElementById("progMatButton"+String(divNumber));
+	}
+	//mainDiv1.style.display="block";
 	hiddenInput.value=methodName;
 	treeLabel.innerHTML="Minimum Spanning Tree-"+methodName;
-	pcaLabel.innerHTML="PCA-"+methodName;
-	noiseVal.value=noise;
-	intensityVal.value=intensity;
+	pcaLabel.innerHTML="Distance Matrix-"+methodName;
+	
+	if(methodName==="mst"){
+		noiseVal.value=noise;
+		intensityVal.value=intensity;
+	}
+	
 	tempOrder.value=dpath;
 	
 	drawWithLabels(nodes,edges,dpath,labels,"mynetwork"+String(divNumber));
@@ -922,8 +1031,19 @@ function drawProgMat(progMat,progMatDiv){
 		    type: 'heatmap'
 		  }
 		];
-
-	Plotly.newPlot(progMatDiv, data);
+	var layout = {
+			autosize: false,
+			width: 400,
+			height: 300,
+			margin: {
+		    l: 50,
+		    r: 10,
+		    b: 25,
+		    t: 20,
+		    pad: 4
+			}
+		};
+	Plotly.newPlot(progMatDiv, data,layout);
 }
 
 
