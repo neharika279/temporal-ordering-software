@@ -155,13 +155,15 @@ function drawWithLabels(nodes,edges,dPath,labels,divName){
 }
 
 
-function getPCAForOrder(order,pcaDivID){
+function getPCAForOrder(order,pcaDivID,selected_distance,dimension_factor){
 	
 	var ordering = String("["+String(order)+"]");
 	
 	post_data = {}
-    post_data["order"] = ordering
+    post_data["order"] = ordering;
     //post_data["graph"] = graph_dict
+    post_data["distance_type"] = selected_distance;
+    post_data["dimension_factor"] = parseInt(dimension_factor);
     
     
     $.ajax({
@@ -238,7 +240,7 @@ function drawPCA(response,pcaDivID){
 
 /********************************************PQ TREE DISPLAY******************************************************/
 function displayPQ(response,pqOrderDivName,orderDivName,pqDivID,orderedDrawDiv,unorderedDrawDiv,pcaDivName,distmatDiv,
-		dimensionDiv,distMatCheckbox,tempOrder) {
+		dimensionDiv,distMatCheckbox,tempOrder,selected_distanceType,selected_dimensionFactor) {
 	
 	var res_response=JSON.parse(response);
 	var pqPaths=JSON.parse(res_response["pqranks"]);
@@ -265,7 +267,7 @@ function displayPQ(response,pqOrderDivName,orderDivName,pqDivID,orderedDrawDiv,u
 	noneRadio.setAttribute("value", globalDPath);
 	noneRadio.setAttribute("name", "pqperms");
 	noneRadio.onclick = function(){ tempSaveOrder(pqOrderDivName,orderedDrawDiv,unorderedDrawDiv,pcaDivName,distmatDiv,
-			dimensionDiv,distMatCheckbox,tempOrder); };
+			dimensionDiv,distMatCheckbox,tempOrder,selected_distanceType,selected_dimensionFactor); };
 	
 	nonelabel.appendChild(noneRadio);
 	nonelabel.appendChild(document.createTextNode("Diameter Path"));
@@ -288,7 +290,7 @@ function displayPQ(response,pqOrderDivName,orderDivName,pqDivID,orderedDrawDiv,u
 		aTag.setAttribute("name", "pqperms");
 		//console.log(aTag.value);
 		aTag.onclick = function(){ tempSaveOrder(pqOrderDivName,orderedDrawDiv,unorderedDrawDiv,pcaDivName,distmatDiv,
-				dimensionDiv,distMatCheckbox,tempOrder); };
+				dimensionDiv,distMatCheckbox,tempOrder,selected_distanceType,selected_dimensionFactor); };
 		
 		label.appendChild(aTag);
 		label.appendChild(document.createTextNode("path"+(i+1)));
@@ -299,7 +301,7 @@ function displayPQ(response,pqOrderDivName,orderDivName,pqDivID,orderedDrawDiv,u
 }
 
 function tempSaveOrder(pqOrderDivName,orderedDrawDiv,unorderedDrawDiv,pcaDivName,distmatDiv,
-		dimensionDiv,distMatCheckbox,tempOrder){
+		dimensionDiv,distMatCheckbox,tempOrder,selected_distanceType,selected_dimensionFactor){
 
 	order=document.querySelector('input[name="pqperms"]:checked').value
 	//console.log(order);
@@ -319,8 +321,8 @@ function tempSaveOrder(pqOrderDivName,orderedDrawDiv,unorderedDrawDiv,pcaDivName
 	document.getElementById(unorderedDrawDiv).style.visibility="hidden";
 	document.getElementById(orderedDrawDiv).style.visibility="visible";
 	
-	getPCAForOrder(orderList,pcaDivName);
-	inPlaceAnalysis(orderList,distmatDiv,dimensionDiv,distMatCheckbox);
+	getPCAForOrder(orderList,pcaDivName,selected_distanceType,selected_dimensionFactor);
+	inPlaceAnalysis(orderList,distmatDiv,dimensionDiv,distMatCheckbox,selected_distanceType,selected_dimensionFactor);
 }
 
 /*function drawCurrentChart(order,nodeList){
@@ -438,6 +440,9 @@ function spdSliderFunction(divNum){
 	var slideP = document.getElementById('Pslider').value;
 	var num_mod=document.getElementById('mod_num').value;
 	
+	var selected_distanceType = document.getElementById('saved_distanceType').value;
+	var selected_dimensionFactor = document.getElementById('saved_dimensionFactor').value;
+	
 	var param_dict = {}; // create an empty array
 
 	param_dict["L"] = parseInt(slideL);
@@ -447,7 +452,7 @@ function spdSliderFunction(divNum){
 	
 	param_dict_string=JSON.stringify(param_dict);
 	
-	recomputeResults(param_dict_string,'spd',divNum);
+	recomputeResults(param_dict_string,'spd',divNum,selected_distanceType,selected_dimensionFactor);
 }
 
 /*function enteredOrdering(dim_divId,dist_divID,textID){
@@ -506,10 +511,16 @@ function computePQFinal(paramDict,currentHiddenDiv,pqTextName,pqOrderDivName,ord
 	
 	var pqnum = document.getElementById(pqTextName).value;
 	//console.log(pqnum)
+	
+	var selected_distanceType=document.getElementById("saved_distanceType").value;
+	var selected_dimensionFactor=document.getElementById("saved_dimensionFactor").value;
+	
 	post_data = {}
     post_data["pqnum"] = pqnum
     post_data["param_dict"] = paramDict;
 	post_data["methodName"] = document.getElementById(currentHiddenDiv).value;
+	post_data["distance_type"] = selected_distanceType;
+    post_data["dimension_factor"] = parseInt(selected_dimensionFactor);
 	
 	$.ajax({
         url: '/computePQFinal',
@@ -518,7 +529,7 @@ function computePQFinal(paramDict,currentHiddenDiv,pqTextName,pqOrderDivName,ord
         contentType:"text/json",  
         success: function(response){
         	displayPQ(response,pqOrderDivName,orderDivName,pqDivID,orderedDrawDiv,unorderedDrawDiv,pcaDivName,distmatDiv,
-        			dimensionDiv,distMatCheckbox,tempOrder);
+        			dimensionDiv,distMatCheckbox,tempOrder,selected_distanceType,selected_dimensionFactor);
         },
         error: function(error) {
             console.log(error);
@@ -530,10 +541,12 @@ function computePQFinal(paramDict,currentHiddenDiv,pqTextName,pqOrderDivName,ord
 
 
 /********************************************EXTRA ANALYSIS***********************************************/
-function inPlaceAnalysis(order,distmatDiv,dimensionDiv,distMatCheckbox){
+function inPlaceAnalysis(order,distmatDiv,dimensionDiv,distMatCheckbox,selected_distanceType,selected_dimensionFactor){
 
 	post_data = {}
-    post_data["order"] = order
+    post_data["order"] = order;
+    post_data["distance_type"] = selected_distanceType;
+    post_data["dimension_factor"] = parseInt(selected_dimensionFactor);
   
     $.ajax({
         url: '/enteredOrdering',
@@ -636,6 +649,42 @@ function drawBackbone(nodes,edges,backbone,di,backboneDiv){
 	var network = new vis.Network(container, data, options);
 }
 
+function drawScree(response,divId){
+	
+	var eigenvals=response["eigenvals"];
+	var dimension_count=response["dimension_count"];
+	
+	var data=[];
+	var xaxis=[];
+	
+	for(var i=0;i<dimension_count;i++){
+		xaxis.push(i+1);
+	}
+	
+	var trace= {
+			x:xaxis,
+			y:eigenvals,
+			type: 'scattergl'
+	};
+	
+	data.push(trace);
+	
+	var layout = {
+			autosize: false,
+			width: 500,
+			height: 300,
+			margin: {
+		    l: 50,
+		    r: 10,
+		    b: 25,
+		    t: 20,
+		    pad: 4
+			}
+		};
+	
+	Plotly.newPlot(divId, data,layout);	
+}
+
 function showDimensions(dimRead,order,divID){
 
 	var data=[];
@@ -703,9 +752,15 @@ function drawDistMat(distmat,divID){
 
 function drawTransposedMatrix(distDivID,tempOrder,checkbox){
 	
-	order=document.getElementById(tempOrder).value
+	order=document.getElementById(tempOrder).value;
+	
+	selected_distanceType=document.getElementById("saved_distanceType").value;
+	selected_dimensionFactor=document.getElementById("saved_dimensionFactor").value;
+	
 	post_data = {};
     post_data["order"] = '['+order+']';
+    post_data["distance_type"] = selected_distanceType;
+    post_data["dimension_factor"] = parseInt(selected_dimensionFactor);
     
     if(document.getElementById(checkbox).checked){
     	
@@ -775,11 +830,13 @@ function drawTransposedMatrix(distDivID,tempOrder,checkbox){
 }*/
 
 
-function getAnalysisFinal(ordering,graph,distmatDiv,dimensionDiv,backboneDiv){
+function getAnalysisFinal(ordering,graph,distmatDiv,dimensionDiv,backboneDiv,selected_distance,dimension_factor){
 	
 	post_data = {};
     post_data["ordering"] = ordering;
     post_data["graph"] = graph;
+    post_data["distance_type"] = selected_distance;
+    post_data["dimension_factor"] = parseInt(dimension_factor);
     
     $.ajax({
         url: '/analyze_all_final',
@@ -857,9 +914,19 @@ function drawAnalysisFinal(response,distmatDiv,dimensionDiv,backboneDiv,ordering
 function computeResultsFinal(paramDict,methodName){
 	//console.log(methodName);
 	//console.log(typeof paramDict);
+	
+	var dist = document.getElementById("distance");
+	var selected_distance = dist.options[dist.selectedIndex].value;
+	var dimension_factor = document.getElementById("dimension_factor").value;
+	
+	document.getElementById("saved_distanceType").value=selected_distance;
+	document.getElementById("saved_dimensionFactor").value=dimension_factor;
+	
 	post_data = {};
     post_data["param_dict"] = paramDict;
     post_data["method_name"] = methodName;
+    post_data["distance_type"] = selected_distance;
+    post_data["dimension_factor"] = parseInt(dimension_factor);
     
     $.ajax({
     	url: '/get_serialization_values',
@@ -868,7 +935,7 @@ function computeResultsFinal(paramDict,methodName){
     	contentType:"text/json",  
     	success: function(response){
     		//console.log(response)
-    		drawResultsFinal(response);
+    		drawResultsFinal(response,selected_distance,dimension_factor);
     	},
     	error: function(error) {
     		console.log(error);
@@ -878,12 +945,14 @@ function computeResultsFinal(paramDict,methodName){
 
 
 
-function recomputeResults(paramDict,methodName,divNum){
+function recomputeResults(paramDict,methodName,divNum,selected_distanceType,selected_dimensionFactor){
 	//console.log(methodName);
 	//console.log(typeof paramDict);
 	post_data = {};
     post_data["param_dict"] = paramDict;
     post_data["method_name"] = methodName;
+    post_data["distance_type"] = selected_distanceType;
+    post_data["dimension_factor"] = parseInt(selected_dimensionFactor);
     
     $.ajax({
     	url: '/get_serialization_values',
@@ -893,7 +962,7 @@ function recomputeResults(paramDict,methodName,divNum){
     	success: function(response){
     		//console.log(response)
     		var res_response=JSON.parse(response);
-    		addDataToDivision(res_response,methodName,divNum);
+    		addDataToDivision(res_response,methodName,divNum,selected_distanceType,selected_dimensionFactor);
     	},
     	error: function(error) {
     		console.log(error);
@@ -902,12 +971,12 @@ function recomputeResults(paramDict,methodName,divNum){
 }
 
 
-function drawResultsFinal(response){
+function drawResultsFinal(response,selected_distance,dimension_factor){
 	
 	var res_response=JSON.parse(response);
 	//console.log(res_response);
 	var methodName=res_response["method_name"];
-	populateUnorderedAnalysis();
+	populateUnorderedAnalysis(selected_distance,dimension_factor);
 	
 	if(methodName==="all"){
 		
@@ -915,13 +984,13 @@ function drawResultsFinal(response){
 		drawThumbnails(res_response,"cst",2);
 		drawThumbnails(res_response,"spd",3);
 		
-		addDataToDivision(res_response,"mst",1);
-		addDataToDivision(res_response,"cst",2);
-		addDataToDivision(res_response,"spd",3);
+		addDataToDivision(res_response,"mst",1,selected_distance,dimension_factor);
+		addDataToDivision(res_response,"cst",2,selected_distance,dimension_factor);
+		addDataToDivision(res_response,"spd",3,selected_distance,dimension_factor);
 		
 	}
 	else{		
-		addDataToDivision(res_response,methodName,1);
+		addDataToDivision(res_response,methodName,1,selected_distance,dimension_factor);
 	}
 	
 	
@@ -940,7 +1009,7 @@ function drawThumbnails(parsed_response,methodName,divNum){
 	drawWithoutLabels(nodes,edges,dpath,"myorderednetworkthumb"+String(divNum));
 }
 
-function addDataToDivision(res_response,methodName,divNumber){
+function addDataToDivision(res_response,methodName,divNumber,selected_distance,dimension_factor){
 	
 	var methodValues=res_response[methodName];
 	//console.log(methodValues);
@@ -954,7 +1023,7 @@ function addDataToDivision(res_response,methodName,divNumber){
 	var edges=methodValues["edges"];
 	var noise=methodValues["noise"];
 	var progmat=methodValues["progmat"];
-	console.log(progmat);
+	//console.log(progmat);
 	//console.log(noise);
 	var intensity=methodValues["intensity"];
 	
@@ -986,8 +1055,8 @@ function addDataToDivision(res_response,methodName,divNumber){
 	
 	drawWithLabels(nodes,edges,dpath,labels,"mynetwork"+String(divNumber));
 	drawWithoutLabels(nodes,edges,dpath,"myorderednetwork"+String(divNumber));
-	getPCAForOrder(dpath,"pca"+String(divNumber));
-	getAnalysisFinal(dpath,graph,"distmat"+String(divNumber),"dimension"+String(divNumber),"backbone"+String(divNumber));
+	getPCAForOrder(dpath,"pca"+String(divNumber),selected_distance,dimension_factor);
+	getAnalysisFinal(dpath,graph,"distmat"+String(divNumber),"dimension"+String(divNumber),"backbone"+String(divNumber),selected_distance,dimension_factor);
 	
 	if(methodName==="spd"){
 		progMatButton.style.display="block";
@@ -996,10 +1065,11 @@ function addDataToDivision(res_response,methodName,divNumber){
 }
 
 
-
-function populateUnorderedAnalysis(){
+function populateUnorderedAnalysis(selected_distance,dimension_factor){
 	
 	post_data = {};
+	post_data["distance_type"] = selected_distance;
+	post_data["dimension_factor"] = parseInt(dimension_factor);
     
     $.ajax({
     	url: '/get_unordered_analysis_data',
@@ -1046,6 +1116,29 @@ function drawProgMat(progMat,progMatDiv){
 	Plotly.newPlot(progMatDiv, data,layout);
 }
 
+
+function computeScree(){
+	
+	var dist = document.getElementById("distance_scree");
+	var selected_distance = dist.options[dist.selectedIndex].value;
+	post_data = {};
+	post_data["distance_type"] = selected_distance;
+	
+    $.ajax({
+    	url: '/get_scree_coordinates',
+    	data:JSON.stringify(post_data),
+    	type: 'POST',
+    	contentType:"text/json",  
+    	success: function(response){
+    		var res_response=JSON.parse(response);
+    		
+        	drawScree(res_response,'scree');
+    	},
+    	error: function(error) {
+    		console.log(error);
+    	}
+    });
+}
 
 function isEmpty(obj) {
     for(var key in obj) {
