@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1"> 
+<script type="text/javascript" src="{{url_for('static',filename='vis.min.js')}}"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+<script src="http://code.highcharts.com/highcharts.js"></script>
+<link href="{{ url_for('static', filename='vis.min.css') }}" rel="stylesheet" type="text/css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.6.0/Chart.min.js"></script>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script type="text/javascript" src="{{url_for('static',filename='draw.js')}}"></script>
+<script type="text/javascript" src="{{url_for('static',filename='jquery.js')}}"></script>
+</head>
+<body>
+	
+	{% extends "layout.html" %} 
+	{% block content %}
+	<td>Choose a distance type:</td>
+	<td><select id="distance_scree">
+		<option value="hamming">Hamming Distance</option>
+		<option value="p">P-distance</option>
+		<option value="jc">Jukes Cantor Distance</option>
+		<option value="tn">Tajima Nei Distance</option>
+		<option value="t">Tamura Distance</option>
+		<option value="k2">Kimura distance</option>
+	</select></td>
+	<button id="scree_plot" class="button" style="float:right" onclick="computeScree();">Compute Scree Plot</button>
+	<div class="draw" id="scree" style="float: left; clear: left"></div>
+	
+	{% endblock %}
+</body>
+</html>

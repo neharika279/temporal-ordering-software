@@ -150,7 +150,7 @@ def get_label_dict(labels):
     return label_dict
 
 
-def readFromFile(filePath,filetype,labeltype):
+def readFromFile(filePath,filetype,labeltype,distancetype,dimension_scaling_factor):
     if(filetype=='option1'):
         if(labeltype=='nolabel'):
             alpha = mop.tableasrows(filePath,"\t", autoconvert=True, hasrownames=False)
@@ -163,14 +163,27 @@ def readFromFile(filePath,filetype,labeltype):
             alpha = mop.tableasrows(filePath,",", autoconvert=True, hasrownames=True)
             
     elif(filetype=='option3'):
-        #print 'found fasta file'
-        alpha=mop.parseSequenceFile(filePath)
-        #print "returned alpha"
-        #print alpha
+        alpha=mop.parseSequenceFile(filePath,distancetype,dimension_scaling_factor)
        
     else:
         return -1
     return alpha
+ 
+def fetchScreeCoordinates(filename,distancetype):
+    return mop.compute_scree_coordinates(filename,distancetype)
+ 
+def readFromFileSequenceData(filePath,distancetype,dimension_scaling_factor):
+    
+    #print 'found fasta file'
+    alpha=mop.parseSequenceFile(filePath,distancetype,dimension_scaling_factor)
+    #print "returned alpha"
+    #print alpha
+       
+    
+    return alpha
+ 
+ 
+ 
  
 def get_path_stats(resultGraph):
     
@@ -194,11 +207,11 @@ def get_path_stats(resultGraph):
             
     return noise_to_signal_ratio,intensity_ratio  
         
-def executePQtree(filePath,filetype,labeltype,mst_graph,dpath,pqno):
+def executePQtree(filePath,filetype,labeltype,mst_graph,dpath,pqno,distance_type,dimension_factor):
      
     perm_dict={}
     total_paths=0
-    alpha=readFromFile(filePath, filetype,labeltype)
+    alpha=readFromFile(filePath, filetype,labeltype,distance_type,dimension_factor)
     
      
     distMat=mop.getDistanceMatrix(alpha)

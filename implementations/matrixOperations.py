@@ -174,7 +174,97 @@ def getGraph():
     return arrRow
 
 
-def parseSequenceFile(filePath):
+
+def get_classical_MDS_eigenvals(A,dimensions):
+    A = A**2
+
+    # centering matrix
+    n = A.shape[0]
+    J_c = 1./n*(np.eye(n) - 1 + (n-1)*np.eye(n))
+    
+    # perform double centering
+    B = -0.5*(J_c.dot(A)).dot(J_c)
+    
+    # find eigenvalues and eigenvectors
+    for i in range(dimensions):
+        eigen_val = np.linalg.eig(B)[i]
+        print "eigenval:"
+        print eigen_val
+        eigen_vec = np.linalg.eig(B)[i].T
+        print "eigenvector:"
+        print eigen_vec
+    
+    # select top 2 dimensions (for example)
+    PC1 = np.sqrt(eigen_val[0])*eigen_vec[0]
+    PC2 = np.sqrt(eigen_val[1])*eigen_vec[1]
+    print "components:"
+    print PC1
+    print PC2
+
+
+def cmdscale(D):
+    """                                                                                       
+    Classical multidimensional scaling (MDS)                                                  
+                                                                                               
+    Parameters                                                                                
+    ----------                                                                                
+    D : (n, n) array                                                                          
+        Symmetric distance matrix.                                                            
+                                                                                               
+    Returns                                                                                   
+    -------                                                                                   
+    Y : (n, p) array                                                                          
+        Configuration matrix. Each column represents a dimension. Only the                    
+        p dimensions corresponding to positive eigenvalues of B are returned.                 
+        Note that each dimension is only determined up to an overall sign,                    
+        corresponding to a reflection.                                                        
+                                                                                               
+    e : (n,) array                                                                            
+        Eigenvalues of B.                                                                     
+                                                                                               
+    """
+    # Number of points                                                                        
+    n = len(D)
+ 
+    # Centering matrix                                                                        
+    H = np.eye(n) - np.ones((n, n))/n
+ 
+    # YY^T                                                                                    
+    B = -H.dot(D**2).dot(H)/2
+ 
+    # Diagonalize                                                                             
+    evals, evecs = np.linalg.eigh(B)
+ 
+    # Sort by eigenvalue in descending order                                                  
+    idx   = np.argsort(evals)[::-1]
+    evals = evals[idx]
+    evecs = evecs[:,idx]
+ 
+    # Compute the coordinates using positive-eigenvalued components only                      
+    w, = np.where(evals > 0)
+    L  = np.diag(np.sqrt(evals[w]))
+    V  = evecs[:,w]
+    Y  = V.dot(L)
+ 
+    return Y, evals
+
+
+def compute_scree_coordinates(filename,distance_type):
+    
+    if not filename.endswith("fas") and not filename.endswith('fasta') and not filename.endswith('fa'):
+            #print(input)
+            sys.exit("Warning! The above file may not be in fasta format. Exiting")
+    else:
+        print filename
+        seqs=parseInput(filename,False)
+       
+        seq_distance_matrix=get_dist(seqs,distance_type)
+        dimensions=len(seq_distance_matrix)
+        Y,eigenvals=cmdscale(seq_distance_matrix)
+
+    return eigenvals,dimensions
+    
+def parseSequenceFile(filePath,distancetype,dimension_scaling_factor):
     
     if not filePath.endswith("fas") and not filePath.endswith('fasta') and not filePath.endswith('fa'):
             #print(input)
@@ -182,23 +272,27 @@ def parseSequenceFile(filePath):
     else:
         print filePath
         seqs=parseInput(filePath,False)
-        print "type of seqs:"
-        print type(seqs[0])
+       
+        seq_distance_matrix=get_dist(seqs,distancetype)
     
+    embedding = MDS(n_components=dimension_scaling_factor)
+    MDS_fix_matrix=embedding.fit_transform(seq_distance_matrix)
     
-    seq_hamming_matrix=get_hamming_dist(seqs)
-    #print "seqs parsed:"
-    #print seqs
-    #print "hamming matrix shape:"
-    #print np.array(seq_hamming_matrix).shape
-    
-    embedding = MDS(n_components=10)
-    MDS_fix_matrix=embedding.fit_transform(seq_hamming_matrix)
-    
-    #print "MDS result"
+    #print "python MDS result"
     #print MDS_fix_matrix
-    #print "array shape:"
-    #print np.array(MDS_fix_matrix).shape
+    #print "size:"
+    #print len(MDS_fix_matrix)
+    
+    #Y,eigenvals=cmdscale(seq_distance_matrix)
+    #print "classical MDS result:"
+    #print np.array(Y)
+    #print "size:"
+    #print len(Y)
+    #print "eigenvalues calculated:"
+    #print eigenvals
+    
+    #print "classical MDS result2::::::"
+    #get_classical_MDS_eigenvals(seq_distance_matrix, 3)
     
     filePath=os.path.join(UPLOAD_FOLDER, "temp_MDS_file.txt")
     f = open(filePath, "w")
@@ -233,19 +327,38 @@ def parseInput(input_file,freq): #get sequences from a file
     return seqs
 
 
-def get_hamming_dist(seqs):
+def get_dist(seqs,distancetype):
     
     l=len(seqs)
-    seq_hamming_matrix=np.zeros([l,l],float) 
+    seq_distance_matrix=np.zeros([l,l],float) 
     
-    for i in range(l):
-        for j in range(l):
-            #seq_hamming_matrix[i][j]=hamming(str(seqs[i]), str(seqs[j]))
-            seq_hamming_matrix[i][j]=seq.hamming_distance(str(seqs[i]), str(seqs[j]))
-     
-    print "hamming matrix:"
-    print seq_hamming_matrix   
-    return seq_hamming_matrix
+    if(distancetype=='hamming'):
+        for i in range(l):
+            for j in range(l):
+                #seq_hamming_matrix[i][j]=hamming(str(seqs[i]), str(seqs[j]))
+                seq_distance_matrix[i][j]=seq.hamming_distance(str(seqs[i]), str(seqs[j]))
+    elif(distancetype=='p'):
+        for i in range(l):
+            for j in range(l):
+                
+                seq_distance_matrix[i][j]=seq.pdistance(str(seqs[i]), str(seqs[j]))
+    elif(distancetype=='jc'):
+        for i in range(l):
+            for j in range(l):
+                
+                seq_distance_matrix[i][j]=seq.JukesCantordistance(str(seqs[i]), str(seqs[j]))
+    elif(distancetype=='tn'):
+        for i in range(l):
+            for j in range(l):
+                
+                seq_distance_matrix[i][j]=seq.TajimaNeidistance(str(seqs[i]), str(seqs[j]))
+    elif(distancetype=='t'):
+        for i in range(l):
+            for j in range(l):
+                
+                seq_distance_matrix[i][j]=seq.Tamuradistance(str(seqs[i]), str(seqs[j]))
+      
+    return seq_distance_matrix
         
 
 

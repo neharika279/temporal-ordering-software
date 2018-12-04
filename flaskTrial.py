@@ -88,6 +88,10 @@ def error(errorMessage):
     return render_template('error.html',errorMessage=errorMessage)
 
 
+@app.route('/show_scree_plot_page')
+def show_scree_plot_page():
+    return render_template('screePlot.html')
+
 @app.route("/clusterMSTFinal/<methodName>",methods=['GET', 'POST'])
 def clusterMSTFinal(methodName):
     
@@ -120,14 +124,15 @@ def exec_method_final(method):
     param_dict["p"]= 0.002
     param_dict["mod"]= 5
     param_json = json.dumps(param_dict)
-    if(method=='mst'):
-        return render_template('finalResults.html',paramDict=param_json,method_name=method)
-    elif(method=='cst'):
-        return render_template('finalResults.html',paramDict=param_json,method_name=method)
-    elif(method=='spd'):
-        return render_template('finalResults.html',paramDict=param_json,method_name=method)
-    elif(method=='all'):
-        return render_template('finalResults_new.html',paramDict=param_json,method_name=method)
+    filetype=session['filetype']
+#     if(method=='mst'):
+#         return render_template('finalResults.html',paramDict=param_json,method_name=method,file_type=filetype)
+#     elif(method=='cst'):
+#         return render_template('finalResults.html',paramDict=param_json,method_name=method,file_type=filetype)
+#     elif(method=='spd'):
+#         return render_template('finalResults.html',paramDict=param_json,method_name=method,file_type=filetype)
+    if(method=='all'):
+        return render_template('finalResults_new.html',paramDict=param_json,method_name=method,file_type=filetype)
 
 
 ################################################################Trial results page render#####################################################################
@@ -148,6 +153,8 @@ def get_serialization_values():
     request_data = json.loads(request.data)
     param_dict = request_data["param_dict"]
     method_name=request_data["method_name"]
+    distance_type=request_data["distance_type"]
+    dimension_factor=request_data["dimension_factor"]
 #     print "recieved method name:"
 #     print method_name
     response_data={}
@@ -157,7 +164,7 @@ def get_serialization_values():
     
     if(method_name=="mst"):
         
-        mst_branch,mst_graph,mst_progMat,mst_labels_info,mst_dPath,mst_nodes,mst_e,mst_noise,mst_intensity=getSerialization("mst", param_dict)
+        mst_branch,mst_graph,mst_progMat,mst_labels_info,mst_dPath,mst_nodes,mst_e,mst_noise,mst_intensity=getSerialization("mst", param_dict,distance_type,dimension_factor)
         
         mst_values["branch"]=mst_branch
         mst_values["graph"]=mst_graph
@@ -173,7 +180,7 @@ def get_serialization_values():
         
     elif(method_name=="cst"):
         
-        cst_branch,cst_graph,cst_progMat,cst_labels_info,cst_dPath,cst_nodes,cst_e,cst_noise,cst_intensity=getSerialization("cst", param_dict)
+        cst_branch,cst_graph,cst_progMat,cst_labels_info,cst_dPath,cst_nodes,cst_e,cst_noise,cst_intensity=getSerialization("cst", param_dict,distance_type,dimension_factor)
         
         cst_values["branch"]=cst_branch
         cst_values["graph"]=cst_graph
@@ -189,7 +196,7 @@ def get_serialization_values():
         
     elif(method_name=="spd"):
         
-        spd_branch,spd_graph,spd_progMat,spd_labels_info,spd_dPath,spd_nodes,spd_e,spd_noise,spd_intensity=getSerialization("spd", param_dict)
+        spd_branch,spd_graph,spd_progMat,spd_labels_info,spd_dPath,spd_nodes,spd_e,spd_noise,spd_intensity=getSerialization("spd", param_dict,distance_type,dimension_factor)
         
         spd_values["branch"]=spd_branch
         spd_values["graph"]=spd_graph
@@ -205,9 +212,9 @@ def get_serialization_values():
     
     elif(method_name=="all"):
         
-        mst_branch,mst_graph,mst_progMat,mst_labels_info,mst_dPath,mst_nodes,mst_e,mst_noise,mst_intensity=getSerialization("mst", param_dict)
-        cst_branch,cst_graph,cst_progMat,cst_labels_info,cst_dPath,cst_nodes,cst_e,cst_noise,cst_intensity=getSerialization("cst", param_dict)
-        spd_branch,spd_graph,spd_progMat,spd_labels_info,spd_dPath,spd_nodes,spd_e,spd_noise,spd_intensity=getSerialization("spd", param_dict)
+        mst_branch,mst_graph,mst_progMat,mst_labels_info,mst_dPath,mst_nodes,mst_e,mst_noise,mst_intensity=getSerialization("mst", param_dict,distance_type,dimension_factor)
+        cst_branch,cst_graph,cst_progMat,cst_labels_info,cst_dPath,cst_nodes,cst_e,cst_noise,cst_intensity=getSerialization("cst", param_dict,distance_type,dimension_factor)
+        spd_branch,spd_graph,spd_progMat,spd_labels_info,spd_dPath,spd_nodes,spd_e,spd_noise,spd_intensity=getSerialization("spd", param_dict,distance_type,dimension_factor)
         
         mst_values["branch"]=mst_branch
         mst_values["graph"]=mst_graph
@@ -289,7 +296,7 @@ def writeResultToFile(response):
     
     f.close() 
 
-def getSerialization(method_name,param_dict):
+def getSerialization(method_name,param_dict,distance_type,dimension_factor):
     
     progMat=[]
     input_dict={}
@@ -297,7 +304,7 @@ def getSerialization(method_name,param_dict):
     filetype=session['filetype']
     labeltype=session['label']
      
-    dataset=ex.readFromFile(filename, filetype, labeltype)
+    dataset=ex.readFromFile(filename, filetype, labeltype,distance_type,dimension_factor)
     
     if(method_name=="mst"):
     
@@ -330,7 +337,7 @@ def getSerialization(method_name,param_dict):
 
 
  
-def analyze_final(order,graph):
+def analyze_final(order,graph,distance_type,dimension_factor):
     
     result={}
     filepath=session['filepath']
@@ -339,7 +346,7 @@ def analyze_final(order,graph):
     order=list(int(k) for k in order)
     
     
-    alpha=ex.readFromFile(filepath, filetype, labeltype)
+    alpha=ex.readFromFile(filepath, filetype, labeltype,distance_type,dimension_factor)
     graph_new={int(k):{int(i):float(j) for i,j in v.items()} for k,v in graph.items()}
     dataset=np.array(alpha)
     
@@ -372,12 +379,15 @@ def analyze_final(order,graph):
 def get_unordered_analysis_data():
     
     unordered=[]
+    request_data = json.loads(request.data)
+    distance_type=request_data["distance_type"]
+    dimension_factor=request_data["dimension_factor"]
     response_data={}
     filepath=session['filepath']
     filetype=session['filetype']
     labeltype=session['label']
     
-    alpha=ex.readFromFile(filepath, filetype, labeltype)
+    alpha=ex.readFromFile(filepath, filetype, labeltype,distance_type,dimension_factor)
     dataset=np.array(alpha)
     
     for i in range(len(dataset)):
@@ -399,8 +409,10 @@ def analyze_all_final():
     request_data = json.loads(request.data)
     ordering=request_data["ordering"]
     graph=request_data["graph"]
+    distance_type=request_data["distance_type"]
+    dimension_factor=request_data["dimension_factor"]
     
-    response=analyze_final(ordering,graph)
+    response=analyze_final(ordering,graph,distance_type,dimension_factor)
     
     return json.dumps(response)  
 
@@ -414,11 +426,16 @@ def get_pca():
     labeltype=session['label']
     
     request_data = json.loads(request.data)
+    #print "request data in /pca:"
+    #print request_data
     ordering = request_data["order"]
+    distance_type=request_data["distance_type"]
+    dimension_factor=request_data["dimension_factor"]
+    
     order=ex.parse_order(ordering)
     order=list(int(k) for k in order)
    
-    alpha=ex.readFromFile(filepath, filetype, labeltype)
+    alpha=ex.readFromFile(filepath, filetype, labeltype,distance_type,dimension_factor)
     dataset=np.array(alpha)
     
     for orderno in order:
@@ -447,11 +464,13 @@ def get_transposed_distance_mat():
     
     request_data = json.loads(request.data)
     ordering = request_data["order"]
+    distance_type=request_data["distance_type"]
+    dimension_factor=request_data["dimension_factor"]
     
     order=ex.parse_order(ordering)
     order=list(int(k) for k in order)
     
-    alpha=ex.readFromFile(filepath, filetype, labeltype)
+    alpha=ex.readFromFile(filepath, filetype, labeltype,distance_type,dimension_factor)
     dataset=np.array(alpha)
     
     
@@ -493,6 +512,23 @@ def get_only_distMat():
     response_data["distmat"]=distmat
     return json.dumps(response_data)
 
+@app.route('/get_scree_coordinates', methods=['POST'])
+def get_scree_coordinates():
+    
+    filepath=session['filepath']
+    request_data = json.loads(request.data)
+    distance_type=request_data["distance_type"]
+    
+    eigenvals,dimension_count=ex.fetchScreeCoordinates(filepath,distance_type)
+    
+    eigenvals=list(float(k) for k in eigenvals)
+    
+    response_data={}
+    response_data["eigenvals"]=eigenvals
+    response_data["dimension_count"]=int(dimension_count)
+    
+    return json.dumps(response_data)
+    
 
 @app.route('/enteredOrdering', methods=['POST'])
 def in_place_analysis():
@@ -502,11 +538,15 @@ def in_place_analysis():
     labeltype=session['label']
     
     request_data = json.loads(request.data)
+    #print "request data in /enteredOrdering:"
+    #print request_data
     order = request_data["order"]
+    distance_type=request_data["distance_type"]
+    dimension_factor=request_data["dimension_factor"]
     #order=ex.parse_order(ordering)
     order=list(int(k) for k in order)
     
-    alpha=ex.readFromFile(filepath, filetype, labeltype)
+    alpha=ex.readFromFile(filepath, filetype, labeltype,distance_type,dimension_factor)
     
     #graph_new={int(k):{int(i):float(j) for i,j in v.items()} for k,v in graph.items()}
     dataset=np.array(alpha)
@@ -529,22 +569,25 @@ def exec_pq_trees_final():
     pqnum = request_data["pqnum"]
     method_name=request_data["methodName"]
     param_dict=request_data["param_dict"]
+    distance_type=request_data["distance_type"]
+    dimension_factor=request_data["dimension_factor"]
+    
     
     filePath=os.path.join(app.config['UPLOAD_FOLDER'], "results.txt")
     f = open(filePath, "a")
     f.write("Alternate orderings using PQ trees for method: "+method_name+"\n")
     
     if method_name=="mst":
-        branch,graph_new,progMat,labels_info,dpath,nodes,e,noise,intensity=getSerialization("mst", param_dict)  
+        branch,graph_new,progMat,labels_info,dpath,nodes,e,noise,intensity=getSerialization("mst", param_dict,distance_type,dimension_factor)  
     elif method_name=="cst":
-        branch,graph_new,progMat,labels_info,dpath,nodes,e,noise,intensity=getSerialization("cst", param_dict)
+        branch,graph_new,progMat,labels_info,dpath,nodes,e,noise,intensity=getSerialization("cst", param_dict,distance_type,dimension_factor)
     elif method_name=="spd":
-        branch,graph_new,progMat,labels_info,dpath,nodes,e,noise,intensity=getSerialization("spd", param_dict)
+        branch,graph_new,progMat,labels_info,dpath,nodes,e,noise,intensity=getSerialization("spd", param_dict,distance_type,dimension_factor)
         
     filename=session['filepath']
     filetype=session['filetype']
     labeltype=session['label']
-    pq_ranks,total_paths,total_perms=ex.executePQtree(filename,filetype,labeltype,graph_new,dpath,int(pqnum))
+    pq_ranks,total_paths,total_perms=ex.executePQtree(filename,filetype,labeltype,graph_new,dpath,int(pqnum),distance_type,dimension_factor)
     f.write("Total number of alternate orderings generated: "+str(total_paths)+"\n")
     f.write("Orderings:"+"\n")
     

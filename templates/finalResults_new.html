@@ -19,10 +19,43 @@
 	<script>
 			var paramDict = {{paramDict|tojson}};
 			var methodName = '{{method_name}}';
+			var fileType = '{{file_type}}';
+			console.log(fileType);
 	</script>
 	<div style="text-align: center">
 		<h1>Results</h1>
 	</div>
+	<div id="distDiv" style="display:none;text-align: center">
+		<input id="saved_distanceType" name="distanceType" type="hidden">
+		<input id="saved_dimensionFactor" name="dimensionFactor" type="hidden">
+		<br>
+		<br>
+		<td>Choose a distance type:</td>
+		<td><select id="distance">
+			<option value="hamming">Hamming Distance</option>
+			<option value="p">P-distance</option>
+			<option value="jc">Jukes Cantor Distance</option>
+			<option value="tn">Tajima Nei Distance</option>
+			<option value="t">Tamura Distance</option>
+			<option value="k2">Kimura distance</option>
+		</select></td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>Choose a dimension factor:</td>
+      	<td><input type="text" id="dimension_factor" name="dimfact" maxlength="4" size="4" value="3"></td>
+      	<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+      	<td><a href={{ url_for('show_scree_plot_page') }} target="_blank">View Scree Plot for Data Set</a></td>
+      	
+	</div>
+	<script>
+		if(fileType==="option3"){
+				var distDiv = document.getElementById("distDiv");
+				distDiv.style.display="block";
+			}
+	</script>
 	<button id="compute_results" class="button" style="float:right" onclick="computeResultsFinal(paramDict,methodName);">Compute Values</button>
 	<a href = {{ url_for('download_file',filename='results.txt') }}>Download Results</a>
 	<button class="collapsible">View Unordered Data</button>
