@@ -1,5 +1,6 @@
 eclipse.preferences.version=1
 encoding//implementations/consensus_kmeans.py=utf-8
 encoding//implementations/cst.py=utf-8
+encoding//implementations/helper_functions.py=utf-8
 encoding//implementations/spd.py=utf-8
 encoding//implementations/time_ordering.py=utf-8

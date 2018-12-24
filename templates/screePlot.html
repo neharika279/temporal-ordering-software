@@ -15,17 +15,26 @@
 	
 	{% extends "layout.html" %} 
 	{% block content %}
-	<td>Choose a distance type:</td>
-	<td><select id="distance_scree">
-		<option value="hamming">Hamming Distance</option>
-		<option value="p">P-distance</option>
-		<option value="jc">Jukes Cantor Distance</option>
-		<option value="tn">Tajima Nei Distance</option>
-		<option value="t">Tamura Distance</option>
-		<option value="k2">Kimura distance</option>
-	</select></td>
-	<button id="scree_plot" class="button" style="float:right" onclick="computeScree();">Compute Scree Plot</button>
-	<div class="draw" id="scree" style="float: left; clear: left"></div>
+	
+	<div class="draw_scree" id="scree_wrapper">
+		<td>Choose a distance type:</td>
+		<td><select id="distance_scree" style=" display: inline;float: none">
+			<option value="hamming">Hamming Distance</option>
+			<option value="p">P-distance</option>
+			<option value="jc">Jukes Cantor Distance</option>
+			<option value="tn">Tajima Nei Distance</option>
+			<option value="t">Tamura Distance</option>
+			<option value="k2">Kimura distance</option>
+		</select></td>
+		<div class="draw" id="scree" style="display: inline-block"></div>
+		<p><button id="scree_plot" class="button" style=" display: inline-block;clear:left" onclick="computeScree();">Compute Scree Plot</button></p>	
+	
+	</div>
+	
+	
+		
+	
+	
 	
 	{% endblock %}
 </body>

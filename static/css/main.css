@@ -290,3 +290,11 @@ table, td {
 	font-size: 35px;
 	cursor: pointer;
 }
+.draw_scree {
+	width: 800px;
+	height: 510px;
+	margin: 0 auto;
+	text-align:center;
+	vertical-align: middle;
+	padding-top: 50px;
+}

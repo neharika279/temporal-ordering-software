@@ -92,25 +92,25 @@ def error(errorMessage):
 def show_scree_plot_page():
     return render_template('screePlot.html')
 
-@app.route("/clusterMSTFinal/<methodName>",methods=['GET', 'POST'])
-def clusterMSTFinal(methodName):
-    
-    if request.method == 'POST':
-        param_dict={}
-        #filePath=os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        param_dict["L"]= int(request.form["L"])
-        param_dict["c"]= float(request.form["c"])
-        param_dict["p"]= float(request.form["p"])
-        param_dict["mod"]= int(request.form["mod"])
-        
-        #print "took parameters. param dict::"
-        #print param_dict
-        
-        p_dict=json.dumps(param_dict)
-        
-        return render_template('finalResults.html',paramDict=p_dict,method_name=methodName)    
-    else:
-        return render_template('clusterMST.html')
+# @app.route("/clusterMSTFinal/<methodName>",methods=['GET', 'POST'])
+# def clusterMSTFinal(methodName):
+#     
+#     if request.method == 'POST':
+#         param_dict={}
+#         #filePath=os.path.join(app.config['UPLOAD_FOLDER'], filename)
+#         param_dict["L"]= int(request.form["L"])
+#         param_dict["c"]= float(request.form["c"])
+#         param_dict["p"]= float(request.form["p"])
+#         param_dict["mod"]= int(request.form["mod"])
+#         
+#         #print "took parameters. param dict::"
+#         #print param_dict
+#         
+#         p_dict=json.dumps(param_dict)
+#         
+#         return render_template('finalResults.html',paramDict=p_dict,method_name=methodName)    
+#     else:
+#         return render_template('clusterMST.html')
 
 
 @app.route('/exec_method_final/<method>')
@@ -125,25 +125,19 @@ def exec_method_final(method):
     param_dict["mod"]= 5
     param_json = json.dumps(param_dict)
     filetype=session['filetype']
-#     if(method=='mst'):
-#         return render_template('finalResults.html',paramDict=param_json,method_name=method,file_type=filetype)
-#     elif(method=='cst'):
-#         return render_template('finalResults.html',paramDict=param_json,method_name=method,file_type=filetype)
-#     elif(method=='spd'):
-#         return render_template('finalResults.html',paramDict=param_json,method_name=method,file_type=filetype)
+
     if(method=='all'):
         return render_template('finalResults_new.html',paramDict=param_json,method_name=method,file_type=filetype)
 
 
-################################################################Trial results page render#####################################################################
-@app.route('/render_results_new')
-def render_results_new():
-    return render_template('results_new.html')
-
-
-@app.route('/render_results_final_new')
-def render_results_final_new():
-    return render_template('finalResults_new.html')
+# @app.route('/render_results_new')
+# def render_results_new():
+#     return render_template('results_new.html')
+# 
+# 
+# @app.route('/render_results_final_new')
+# def render_results_final_new():
+#     return render_template('finalResults_new.html')
     
     
 
@@ -155,8 +149,7 @@ def get_serialization_values():
     method_name=request_data["method_name"]
     distance_type=request_data["distance_type"]
     dimension_factor=request_data["dimension_factor"]
-#     print "recieved method name:"
-#     print method_name
+    
     response_data={}
     mst_values={}
     cst_values={}
@@ -296,6 +289,15 @@ def writeResultToFile(response):
     
     f.close() 
 
+
+##Takes in  5 parameters: method name, parameters for SPD, distance type for sequence data (default is hamming), the dimension count for MDS embedding (default is 3)
+##argument param_dict is a dictionary that will have the following parameter specifications:
+##L (key) : number of iterations for consensus clustering (value)
+##c (key) = threshold for cluster merging (value)
+##p (key) = threshold for concordance measure (value)
+##mod (key) = number of final modules for the seriation (value)
+##Standard values for above SPD parameters:
+##L:100; c:0.8; p:0.0002; mod:5
 def getSerialization(method_name,param_dict,distance_type,dimension_factor):
     
     progMat=[]
@@ -352,13 +354,7 @@ def analyze_final(order,graph,distance_type,dimension_factor):
     
     distmat=ex.get_order_dist_mat(dataset, order)
     dimension_reading=ex.get_order_dimension_readings(dataset, order)
-    #print "order:"
-    #print order
-    #print np.array(dimension_reading)
-    #print "number of rows:"
-    #print len(dimension_reading)
-    #print "number of dimensions:"
-    #print len(dimension_reading[0])
+   
     backbone=get_indecisive_backbone(graph_new,order)
     di=get_decisive_indecisive_nodes(graph_new)
     

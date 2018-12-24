@@ -188,25 +188,7 @@ function drawPCA(response,pcaDivID){
 	var res_response=JSON.parse(response);
 	console.log(res_response);
 	var data=res_response["pca_values"];
-	//var x = [1,2,3,4,5];
-	//var y = [3,4,5,7,8];
-	//var z = [5,10,2,3,4]; 
 	var c = ["red","green","yellow"];
-	
-	/*var trace={
-			type: 'scatter3d',
-			//mode: 'lines',
-			x: data[0],
-			y: data[1],
-			z: data[2],
-			opacity: 1,
-			line: {
-				width: 6,
-				color: ,
-				reversescale: false
-			  }	
-	}
-	data.push(trace);*/
 	
 	var layout = {
 			autosize: false,
@@ -479,32 +461,32 @@ function spdSliderFunction(divNum){
     });
 }*/
 
-function computePQ(counts,dpath,graph,pqTextName,pqOrderDivName,orderDivName,pqDivID,orderedDrawDiv,unorderedDrawDiv){
-	
-	//console.log(counts);
-	var graph_dict=JSON.parse(graph);
-	//console.log(graph_dict);
-	var pqnum = document.getElementById(pqTextName).value;
-	//console.log(pqnum)
-	post_data = {}
-    post_data["pqnum"] = pqnum
-    post_data["dpath"] = dpath
-    post_data["graph"] = graph_dict
-	
-	$.ajax({
-        url: '/computePQ',
-        data:JSON.stringify(post_data),
-        type: 'POST',
-        contentType:"text/json",  
-        success: function(response){
-        	displayPQ(counts,response,pqOrderDivName,orderDivName,pqDivID,orderedDrawDiv,unorderedDrawDiv);
-        },
-        error: function(error) {
-            console.log(error);
-        }
-    });
-	
-}
+//function computePQ(counts,dpath,graph,pqTextName,pqOrderDivName,orderDivName,pqDivID,orderedDrawDiv,unorderedDrawDiv){
+//	
+//	//console.log(counts);
+//	var graph_dict=JSON.parse(graph);
+//	//console.log(graph_dict);
+//	var pqnum = document.getElementById(pqTextName).value;
+//	//console.log(pqnum)
+//	post_data = {}
+//    post_data["pqnum"] = pqnum
+//    post_data["dpath"] = dpath
+//    post_data["graph"] = graph_dict
+//	
+//	$.ajax({
+//        url: '/computePQ',
+//        data:JSON.stringify(post_data),
+//        type: 'POST',
+//        contentType:"text/json",  
+//        success: function(response){
+//        	displayPQ(counts,response,pqOrderDivName,orderDivName,pqDivID,orderedDrawDiv,unorderedDrawDiv);
+//        },
+//        error: function(error) {
+//            console.log(error);
+//        }
+//    });
+//	
+//}
 
 function computePQFinal(paramDict,currentHiddenDiv,pqTextName,pqOrderDivName,orderDivName,pqDivID,orderedDrawDiv,unorderedDrawDiv,
 		pcaDivName,distmatDiv,dimensionDiv,distMatCheckbox,tempOrder){
@@ -670,17 +652,34 @@ function drawScree(response,divId){
 	data.push(trace);
 	
 	var layout = {
-			autosize: false,
-			width: 500,
-			height: 300,
-			margin: {
-		    l: 50,
-		    r: 10,
-		    b: 25,
+		
+		autosize: false,
+		width: 500,
+		height: 300,
+		margin: {
+		    b: 10,
 		    t: 20,
 		    pad: 4
-			}
-		};
+		},		
+		xaxis: {
+		    title: 'Dimensions',
+		    automargin: true,
+		    titlefont: {
+		      family: 'Courier New, monospace',
+		      size: 18,
+		      color: '#7f7f7f'
+		    }
+		 },
+		 yaxis: {
+		    title: 'Eigenvalues',
+		    automargin: true,
+		    titlefont: {
+		      family: 'Courier New, monospace',
+		      size: 18,
+		      color: '#7f7f7f'
+		    }
+		}	
+	};
 	
 	Plotly.newPlot(divId, data,layout);	
 }
@@ -709,17 +708,35 @@ function showDimensions(dimRead,order,divID){
 	}
 	
 	var layout = {
-			autosize: false,
-			width: 500,
-			height: 300,
-			margin: {
-		    l: 50,
-		    r: 10,
-		    b: 25,
+		
+		autosize: false,
+		width: 500,
+		height: 300,
+		margin: {
+		    b: 10,
 		    t: 20,
 		    pad: 4
-			}
-		};
+		},	
+		xaxis: {
+		    title: 'Dimensions',
+		    automargin: true,
+		    titlefont: {
+		      family: 'Courier New, monospace',
+		      size: 18,
+		      color: 'black'
+		    }
+		 },
+		 yaxis: {
+		    title: 'Values',
+		    automargin: true,
+		    titlefont: {
+		      family: 'Courier New, monospace',
+		      size: 18,
+		      color: 'black'
+		    }
+		}
+		
+	};
 	
 	Plotly.newPlot(divID, data,layout);	
 }
