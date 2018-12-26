@@ -154,8 +154,18 @@ function drawWithLabels(nodes,edges,dPath,labels,divName){
 	var network = new vis.Network(container, data, options);
 }
 
+function recomputePCA(pcaDivID,savedorderID,PCA_selectID){
+	
+	var PCA_dim = document.getElementById(PCA_selectID);
+	var selected_dim = PCA_dim.options[PCA_dim.selectedIndex].value;
+	//console.log(selected_dim);
+	order=document.getElementById(savedorderID).value;
+	selected_distance=document.getElementById("saved_distanceType").value;
+	dimension_factor=document.getElementById("saved_dimensionFactor").value;
+	getPCAForOrder(order,pcaDivID,selected_distance,dimension_factor,parseInt(selected_dim));
+}
 
-function getPCAForOrder(order,pcaDivID,selected_distance,dimension_factor){
+function getPCAForOrder(order,pcaDivID,selected_distance,dimension_factor,pca_dimension_count){
 	
 	var ordering = String("["+String(order)+"]");
 	
@@ -164,7 +174,7 @@ function getPCAForOrder(order,pcaDivID,selected_distance,dimension_factor){
     //post_data["graph"] = graph_dict
     post_data["distance_type"] = selected_distance;
     post_data["dimension_factor"] = parseInt(dimension_factor);
-    
+    post_data["pca_dimension_count"] = parseInt(pca_dimension_count);
     
     $.ajax({
         url: '/pca',
@@ -186,55 +196,99 @@ function drawPCA(response,pcaDivID){
 	
 	var chartData=[];
 	var res_response=JSON.parse(response);
-	console.log(res_response);
+	//console.log(res_response);
 	var data=res_response["pca_values"];
-	//var x = [1,2,3,4,5];
-	//var y = [3,4,5,7,8];
-	//var z = [5,10,2,3,4]; 
+	var error=res_response["error_value"];
 	var c = ["red","green","yellow"];
 	
-	/*var trace={
-			type: 'scatter3d',
-			//mode: 'lines',
-			x: data[0],
-			y: data[1],
-			z: data[2],
-			opacity: 1,
-			line: {
-				width: 6,
-				color: ,
-				reversescale: false
-			  }	
+	if(parseInt(error)===1){
+		
+		var para = document.createElement("P");   
+		var t = document.createTextNode("Too few columns in original dataset"); 
+		para.appendChild(t); 
+		document.getElementById(para).style.color = "black";
+		document.getElementById(pcaDivID).appendChild(para);
 	}
-	data.push(trace);*/
-	
-	var layout = {
-			autosize: false,
-			width: 500,
-			height: 300,
-			margin: {
-		    l: 50,
-		    r: 10,
-		    b: 25,
-		    t: 20,
-		    pad: 4
+	else{
+		var layout = {
+				autosize: false,
+				width: 500,
+				height: 300,
+				margin: {
+					b: 10,
+				    t: 20,
+				    pad:4
+				},
+				xaxis: {
+				    title: 'PC1',
+				    automargin: true,
+				    titlefont: {
+				      family: 'Courier New, monospace',
+				      size: 18,
+				      color: 'black'
+				    }
+				 },
+				 yaxis: {
+					    title: 'PC2',
+					    automargin: true,
+					    titlefont: {
+					      family: 'Courier New, monospace',
+					      size: 18,
+					      color: 'black'
+					    }
+				},
+				zaxis: {
+					    title: 'PC3',
+					    automargin: true,
+					    titlefont: {
+					      family: 'Courier New, monospace',
+					      size: 18,
+					      color: 'black'
+					    }
+				}
+			};
+			var dataLen=data.length;
+			//console.log(dataLen);
+			if(dataLen==3){
+				var PCAdata=[{
+					  type: 'scatter3d',
+					  //mode: 'lines',
+					  x: data[0],
+					  y: data[1],
+					  z: data[2],
+					  opacity: 1,
+					  line: {
+					    width: 6,
+					    color: "yellow",
+					    reversescale: false
+					  }
+					}];
 			}
-		};
+			else if(dataLen==2){
+				var PCAdata=[{
+					  type: 'scatter',
+					  mode: 'lines+markers',
+					  x: data[0],
+					  y: data[1],
+					  opacity: 1,
+					  marker: {
+						  color: 'yellow',
+						  size: 10,
+						  line: {
+						    width: 4,
+						    color: "yellow",
+						    reversescale: false
+						  }
+					  }
+					}];
+			}
+			
+			Plotly.newPlot(pcaDivID,PCAdata,layout);
+
+	}
 	
-	Plotly.newPlot(pcaDivID, [{
-	  type: 'scatter3d',
-	  //mode: 'lines',
-	  x: data[0],
-	  y: data[1],
-	  z: data[2],
-	  opacity: 1,
-	  line: {
-	    width: 6,
-	    color: "yellow",
-	    reversescale: false
-	  }
-	}],layout);
 	
+		
 }
 
 
@@ -321,7 +375,7 @@ function tempSaveOrder(pqOrderDivName,orderedDrawDiv,unorderedDrawDiv,pcaDivName
 	document.getElementById(unorderedDrawDiv).style.visibility="hidden";
 	document.getElementById(orderedDrawDiv).style.visibility="visible";
 	
-	getPCAForOrder(orderList,pcaDivName,selected_distanceType,selected_dimensionFactor);
+	getPCAForOrder(orderList,pcaDivName,selected_distanceType,selected_dimensionFactor,3);
 	inPlaceAnalysis(orderList,distmatDiv,dimensionDiv,distMatCheckbox,selected_distanceType,selected_dimensionFactor);
 }
 
@@ -479,32 +533,32 @@ function spdSliderFunction(divNum){
     });
 }*/
 
-function computePQ(counts,dpath,graph,pqTextName,pqOrderDivName,orderDivName,pqDivID,orderedDrawDiv,unorderedDrawDiv){
-	
-	//console.log(counts);
-	var graph_dict=JSON.parse(graph);
-	//console.log(graph_dict);
-	var pqnum = document.getElementById(pqTextName).value;
-	//console.log(pqnum)
-	post_data = {}
-    post_data["pqnum"] = pqnum
-    post_data["dpath"] = dpath
-    post_data["graph"] = graph_dict
-	
-	$.ajax({
-        url: '/computePQ',
-        data:JSON.stringify(post_data),
-        type: 'POST',
-        contentType:"text/json",  
-        success: function(response){
-        	displayPQ(counts,response,pqOrderDivName,orderDivName,pqDivID,orderedDrawDiv,unorderedDrawDiv);
-        },
-        error: function(error) {
-            console.log(error);
-        }
-    });
-	
-}
+//function computePQ(counts,dpath,graph,pqTextName,pqOrderDivName,orderDivName,pqDivID,orderedDrawDiv,unorderedDrawDiv){
+//	
+//	//console.log(counts);
+//	var graph_dict=JSON.parse(graph);
+//	//console.log(graph_dict);
+//	var pqnum = document.getElementById(pqTextName).value;
+//	//console.log(pqnum)
+//	post_data = {}
+//    post_data["pqnum"] = pqnum
+//    post_data["dpath"] = dpath
+//    post_data["graph"] = graph_dict
+//	
+//	$.ajax({
+//        url: '/computePQ',
+//        data:JSON.stringify(post_data),
+//        type: 'POST',
+//        contentType:"text/json",  
+//        success: function(response){
+//        	displayPQ(counts,response,pqOrderDivName,orderDivName,pqDivID,orderedDrawDiv,unorderedDrawDiv);
+//        },
+//        error: function(error) {
+//            console.log(error);
+//        }
+//    });
+//	
+//}
 
 function computePQFinal(paramDict,currentHiddenDiv,pqTextName,pqOrderDivName,orderDivName,pqDivID,orderedDrawDiv,unorderedDrawDiv,
 		pcaDivName,distmatDiv,dimensionDiv,distMatCheckbox,tempOrder){
@@ -670,17 +724,34 @@ function drawScree(response,divId){
 	data.push(trace);
 	
 	var layout = {
-			autosize: false,
-			width: 500,
-			height: 300,
-			margin: {
-		    l: 50,
-		    r: 10,
-		    b: 25,
+		
+		autosize: false,
+		width: 500,
+		height: 300,
+		margin: {
+		    b: 10,
 		    t: 20,
 		    pad: 4
-			}
-		};
+		},		
+		xaxis: {
+		    title: 'Dimensions',
+		    automargin: true,
+		    titlefont: {
+		      family: 'Courier New, monospace',
+		      size: 18,
+		      color: '#7f7f7f'
+		    }
+		 },
+		 yaxis: {
+		    title: 'Eigenvalues',
+		    automargin: true,
+		    titlefont: {
+		      family: 'Courier New, monospace',
+		      size: 18,
+		      color: '#7f7f7f'
+		    }
+		}	
+	};
 	
 	Plotly.newPlot(divId, data,layout);	
 }
@@ -709,17 +780,35 @@ function showDimensions(dimRead,order,divID){
 	}
 	
 	var layout = {
-			autosize: false,
-			width: 500,
-			height: 300,
-			margin: {
-		    l: 50,
-		    r: 10,
-		    b: 25,
+		
+		autosize: false,
+		width: 500,
+		height: 300,
+		margin: {
+		    b: 10,
 		    t: 20,
 		    pad: 4
-			}
-		};
+		},	
+		xaxis: {
+		    title: 'Dimensions',
+		    automargin: true,
+		    titlefont: {
+		      family: 'Courier New, monospace',
+		      size: 18,
+		      color: 'black'
+		    }
+		 },
+		 yaxis: {
+		    title: 'Values',
+		    automargin: true,
+		    titlefont: {
+		      family: 'Courier New, monospace',
+		      size: 18,
+		      color: 'black'
+		    }
+		}
+		
+	};
 	
 	Plotly.newPlot(divID, data,layout);	
 }
@@ -1055,7 +1144,7 @@ function addDataToDivision(res_response,methodName,divNumber,selected_distance,d
 	
 	drawWithLabels(nodes,edges,dpath,labels,"mynetwork"+String(divNumber));
 	drawWithoutLabels(nodes,edges,dpath,"myorderednetwork"+String(divNumber));
-	getPCAForOrder(dpath,"pca"+String(divNumber),selected_distance,dimension_factor);
+	getPCAForOrder(dpath,"pca"+String(divNumber),selected_distance,dimension_factor,3);
 	getAnalysisFinal(dpath,graph,"distmat"+String(divNumber),"dimension"+String(divNumber),"backbone"+String(divNumber),selected_distance,dimension_factor);
 	
 	if(methodName==="spd"){

@@ -3,7 +3,7 @@
 <body>
 	{% extends "layout.html" %}
 	{% block content %}
-	<div id="column_l">
+	<div id="column_l" style="width: 700px">
 		<h1>Temporal Ordering of Sampled Data Readings for Biological Data</h1>
 		<p>This is a web-based application that makes available different techniques to order data samples temporally.
 		Any of these methods can be used for data that has been sampled at various points in time, where the exact time point of sampling in unknown. 
@@ -49,12 +49,21 @@
     	</form>
 		
 	</div>
-	<div id="column_r">
-		<h1>File Format</h1>
-		<p>The input file provided must either be a tab seperated file, or a comma seperated file.
-		Each new line of the file would denote an observation/sampling done in an unknown time point.
-		Each tab or comma seperated value in every line will indicate the values of the biological variables recorded for that instance of sampling</p>
-		
+	<div id="column_r" >
+		<h1>Sample File Downloads</h1>
+		<p>The input file provided can be a tab separated file, comma separated file, or a sequence fasta file. The accepted file extensions are
+		.txt, .csv, .fas, .fa, .fasta. If the input file is a genetic sequence file, it should have a file extension of .fas, .fa, or .fasta. 
+		Each new line of the file indicates the biological variable recorded for all instances of sampling. 
+		For numerical tab separated or comma separated data sets, each tab or comma separated value in every line will 
+		denote an observation/sampling done in an unknown time point.</p>
+		<ul> 
+			<li><a href="{{ url_for('download_file', filename='jellyroll.txt') }}">Artificial Jellyroll Dataset</a></li>
+			<p>Artificial two dimensional dataset consisting 150 points. Magwene <i>et al.</i>,(2003)</p>
+			<li><a href="{{ url_for('download_file', filename='data.csv') }}">Cell cycle data</a></li>
+			<p>Gene expression data matrix of 3196 high variance genes across 17 unordered samples from only one cell cycle. Dataset was  
+			obtained from the supplemental text for Qiu <i>et al</i>,(2011)</p>
+		</ul>
+		<p><a href="{{ url_for('visualize') }}" target="_blank">Visualize results for sample dataset - Jellyroll</a></p>
 		
 	</div>
 	</div>   

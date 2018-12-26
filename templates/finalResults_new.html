@@ -35,13 +35,13 @@
 			<option value="hamming">Hamming Distance</option>
 			<option value="p">P-distance</option>
 			<option value="jc">Jukes Cantor Distance</option>
-			<option value="tn">Tajima Nei Distance</option>
+<!-- 			<option value="tn">Tajima Nei Distance</option> -->
 			<option value="t">Tamura Distance</option>
 			<option value="k2">Kimura distance</option>
 		</select></td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
-		<td>Choose a dimension factor:</td>
+		<td>Choose the count of dimension for embedding data points:</td>
       	<td><input type="text" id="dimension_factor" name="dimfact" maxlength="4" size="4" value="3"></td>
       	<td>&nbsp;</td>
 		<td>&nbsp;</td>
@@ -64,8 +64,7 @@
 		<div class='leftDiv' id='resultsLeftAnalysis1'>
 			<div class="draw" id="distmat_unordered"
 				style="float: left; clear: left"></div>
-			<input type="checkbox" id="changeDistMatUnordered" name="treeview"
-				value="ordered"
+			<input type="checkbox" id="changeDistMatUnordered" name="treeview" value="ordered"
 				onclick="drawTransposedMatrix('distmat_unordered','saved_unordered','changeDistMatUnordered')">
 			View distance matrix for dimensions across all data samples
 		</div>
@@ -117,8 +116,8 @@
 	<div id="mst1" class="containerTab" style="display: none; background: #f5f5f0">
 		<span onclick="this.parentElement.style.display='none'"
 			class="closebtn">&times;</span>
-		<input id="savedorder1" name="order" type="hidden"> <input
-			type="hidden" id="mstmethod1">
+		<input id="savedorder1" name="order" type="hidden"> 
+		<input type="hidden" id="mstmethod1">
 		
 		<div class="row">
 			<div class="column">
@@ -187,6 +186,16 @@
 		<div class="content">
 			<div class='leftDiv' id='resultsLeftAnalysis1'>
 				<div class="draw" id="pca1" style="float: left; clear: left"></div>
+				<div id="pcaDiv1" style="display:none;text-align: center">
+
+					<select id="pcaDimension1">
+						<option value="2">2</option>
+						<option value="3">3</option>
+					</select>
+					<input id="pcaCompute1" type="button" value="Recompute"
+							onclick="recomputePCA('pca1','savedorder1','pcaDimension1');" />
+					
+				</div>
 				<button class="collapsible">View Indecisive Backbone</button>
 				<div class="content">
 					<p>Indecisive Backbone for the Diameter Path - Basis for
@@ -234,6 +243,16 @@
 		<div class="content">
 			<div class='leftDiv' id='resultsLeftAnalysis2'>
 				<div class="draw" id="pca2" style="float: left; clear: left"></div>
+				<div id="pcaDiv2" style="display:none;text-align: center">
+					<p id="pcaError2"></p>
+					<select id="pcaDimension2">
+						<option value="2">2</option>
+						<option value="3">3</option>
+					</select>
+					<input id="pcaCompute2" type="button" value="Recompute"
+							onclick="recomputePCA('pca2','savedorder2','pcaDimension2');" />
+					
+				</div>
 			</div>
 			<div id="resultsRightAnalysis2" class="rightDiv">
 				<div class="draw" id="dimension2" style="float: left; clear: left"></div>
@@ -342,6 +361,16 @@
 		<div class="content">
 			<div class='leftDiv' id='resultsLeftAnalysis3'>
 				<div class="draw" id="pca3" style="float: left; clear: left"></div>
+				<div id="pcaDiv3" style="display:none;text-align: center">
+					<p id="pcaError3"></p>
+					<select id="pcaDimension3">
+						<option value="2">2</option>
+						<option value="3">3</option>
+					</select>
+					<input id="pcaCompute3" type="button" value="Recompute"
+							onclick="recomputePCA('pca3','savedorder3','pcaDimension3');" />
+					
+				</div>
 				<button id="progMatButton3" class="collapsible" style="display:none">View Progression Similarity Matrix</button>
 				<div class="content">
 					<div class="draw" id="progmat3" style="float: left; clear: left"></div>
@@ -353,7 +382,14 @@
 		</div>
 
 	</div>
-
+	<script>
+		if(fileType!="option3"){
+			document.getElementById("pcaDiv1").style.display="block";
+			document.getElementById("pcaDiv2").style.display="block";
+			document.getElementById("pcaDiv3").style.display="block";
+		}
+	</script>
+	
 	<script>
 		function openTab(tabName) {
 		  var i, x;
@@ -364,7 +400,7 @@
 		  document.getElementById(tabName).style.display = "block";
 		}
 	</script>
-
+	
 	<script>
 		var coll = document.getElementsByClassName("collapsible");
 		var i;

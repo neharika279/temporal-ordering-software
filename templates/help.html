@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<body>
+	{% extends "layout.html" %}
+	{% block content %}
+	<div id="column_l" style="width: 700px">
+		<h1>Help and Tutorial</h1>
+		<p>
+			<a class="jump" href="#format" style="color: #808000">File Conventions and Formats</a><br>
+			<a class="jump" href="#implementation" style="color: #808000">Implementations</a><br>
+			<a class="jump" href="#visualization" style="color: #808000">Visualization and Interpretation of Results</a><br>
+		</p>
+		
+		<h2 id="format">File Conventions and Formats</h2><br style="clear:both;" />
+		<p>
+			The sample readings for variables should be presented in one of the acceptable file formats: .txt, .csv, .fa, .fs, or .fasta
+			For numerical sample readings on each row, they should be tab/comma separated from each other. All the values on a single row of the input file 
+			will denote the readings of different sampling instances in unknown time points Each new row of the input file will indicate a new biological variable 
+			(e.g. a different gene) for which the sample readings are recorded. The numerical input will be read and interpreted as an n dimensional data array.
+			In order to distinguish input biological variables into different groups for different phases in a biological process, the labeling for each row must be provided 
+			in the input file. If the labeled dataset option is chosen while uploading the input file, the first column of the file in tab/comma separated file is taken as the 
+			data labels. The groupings of these data points in the final reconstruction will be explicitly visible for labeled datasets.
+			Genetic sequence data in a FASTA format can be uploaded as a .fa, .fas, or .fasta file. Each sequence will be considered as a new sample point, and the final 
+			temporal reconstruction will give an idea about the sampling order for these sequences. The input sequences will be embedded into an n dimensional numerical 
+			array by Multidimensional Scaling. The distance matrix used for this embedding can be chosen as any one of the five genetic distances implemented. For genetic data 
+			files, the unlabeled data option should be selected at the time of file upload.
+			A sample two dimensional, tab separated file can be downloaded <a href="{{ url_for('download_file', filename='jellyroll.txt') }}">here</a>
+		</p>
+			
+		<h2 id="implementation">Implementations</h2><br style="clear:both;" />
+		
+		<p>This software offers three different implementations for temporal reconstruction of biological samples. See <a href="{{ url_for('citation') }}" target="_blank">citation</a>.
+		All three methods implemented are graph and tree based approaches to find the most appropriate seriation of 
+		sample data points that may be biologically significant.</p>
+		
+		<ol>
+			<li>
+				The first method uses Minimum Spanning trees (MST) to compute the temporal ordering of the data points. The longest 
+				path in the MST called as the diameter path is the best approximation of the reconstructed seriation. 
+				It calculates the noise percentage and the sampling intensity of the data set that can be used to decide if the 
+				branches coming off the diameter path should be explored for alternate orderings. A data structure called PQ tree 
+				is used to account for uncertainties arising the ordering due to the noise in the data. The combination of interior 
+				P and Q nodes in the rooted binary PQ tree give a set of alternate orderings for the input data set.
+			</li>
+			<li>
+				The second method uses the concept of MST along with iterative consensus clustering to reconstruct the ordering of the input data. The clustering 
+				of data points ensures the biological variables following the same biological progression underlying a process are grouped together in the final ordering. 
+				A measure of statistical concordance determines the clusters of variables that are in agreement with a common biological process.
+				The algorithm presented in this technique is Sample Progression Discovery.
+			</li>
+			<li>
+				The third method implemented is based on the construction of Cluster Spanning Trees (CST). The input data points are hierarchically clustered to form a 
+				hierarchical tree. The nodes in the trees are then connected to each other by using a cluster merging method to form the CST. The data points are grouped 
+				in the resulting CST by hierarchical relationships. So the groupings of points on the final reconstructed ordering attempts to exhibit samples/biological 
+				variables resulting from the same biological process.
+			</li>
+		
+		</ol>
+	
+		<p>The methodologies used to temporally reconstruct numerical biological sample readings from process are extented to genetic sequence data. In studies and experiments 
+		related to disease transmission, or genetic relatedness, the order in which the sequence samples are obtained from hosts can be telling about the transmission events 
+		taking place. Genetic sequence data provided as input is used to compute pairwise genetic distances between the samples. Five different types of genetic distances are 
+		implemented</p>
+		<li>Hamming Distance :This simply gives the number of positions where the nucleotide bases are different
+		</li> 
+		<li>Jukes Cantor Distance: This genetic distance measurement is based on the Jukes Cantor model, where the rate of substitution for all four DNA nucleotide bases are considered 
+			to be the same.
+		</li> 
+		<li>P Distance: This measure give the proportion of sites at which the nucleotide bases differ in the two sequences
+		</li>
+		<li>Kimura 2 parameter Distance: The substitution types of transition (purine-purine and pyrimidine-pyrimidine) and transversions (purine-pyrimidine) are considered differently 
+			in this model. The nucleotide frequencies are assumed to be the same.
+		</li>
+		<li>Tamura-Nei Distance: The substitution types of transition (purine-purine and pyrimidine-pyrimidine) and transversions (purine-pyrimidine) are considered differently 
+			in this model. The nucleotide frequencies are also taken into consideration here.
+		</li>
+		
+		<p>The distance matrices for the sequence data are embedded in an n-dimensional space using a multivariate technique called Multidimensional Scaling (MDS). The 
+		number of dimensions for the embedding can determined with the help of a scree plot that can be viewed on the results page. A scree plot plots all the eigen values
+		of the selected type of distance matrix on the y-axis against all the sample numbers/dimensions along the x-axis. This can help determine the dimensionality of the 
+		embedding space that will best represent the data. The drop/elbow of the scree plot is used to select the number of dimsnions for the MDS embedding, and can be selected 
+		and visualized for different values on the main results page.</p> 
+		
+		
+		<h2 id="visualization">Visualization and Interpretation of Results</h2><br style="clear:both;" />
+		
+		<p>The final reconstructed seriation of the sample points are visualized in a number of ways on the results page. The spanning trees constructed with the data 
+		points are shown in the form of a network graph. The nodes on the graph denote the input data points, and they are numbered according to their respective indices in the 
+		input file. The longest path of the trees called as the diameter path is highlighted in green across the graph.</p>
+		
+		
+		<p>A heatmap signifying the pairwise euclidean distances between all the rows/biological variables is provided. This view can be alternated to show the pairwise distances 
+		between the columns of the matrix as well. This will signify the gradual change in distances between the samples recorded along the reconstructed ordering.</p>
+		
+		
+		<p>Extra analysis of the data can be visualized in the form of a 2D/3D Principal Component Analysis (PCA) plot for the ordering of the data points. This visualizes 
+		the placing of the data points in a 2D or 3D space represented by the two or three most principle components of the data set.</p>
+		
+		<p>The dimension value chart under the extra analysis provides a comparative visualization of the values of individual sample readings along the reconstructed ordering 
+		of biological variables, or vice versa depending on the way the input was provided. This is gives more insight into the changing values between each sample point 
+		in the reconstructed ordering, and how these values graphs differ from each other along the same oredering of points. Each trace in the graph refers to a separate 
+		column in the input data matrix following the reconstructed ordering of the rows.</p>
+		
+		<p>Method specific visualizations: The results for the fisrt MST method, and the second Sample Progression Discovery based method provides visualization of two 
+		important intermediate results respectively. The indecisive backbone is used in the first method to construct the PQ tree that takes into account the uncertainties 
+		in the ordering caused by data noise. The indecisive backbone of the MST constructed from the data, is the longest path along the diameter path of the MST where 
+		the first and last node of the path are indecisive. An indecisive node is identified as one having more than two branches. The decisive and indecisive nodes determine 
+		the formation of P and Q nodes in the PQ tree respectively.The Sample Progression Discovery method uses a progression similarity matrix to determine the clusters of 
+		data points most concordant to each other. The matrix is visualized a s a heatmap that shows an nxn matrix, where n is the number of data modules/clusters computed.
+		A high value/color gradient between a set of modules, will show a high biological similarity between them, and they can be used in the formation of the final MST ordering. 
+		This number is configurable on the results page</p>
+		
+		<p>Parameter Tuning: The important parameters related to the MST and SPD based methods can be tuned and changed to see how their values are reflected in the 
+		recomputed results.</p>
+		
+		
+	</div>
+	<div id="column_r" style="width: 500px">
+		<h1>Step by Step tutorial</h1>
+		<ul> 
+			<li>Upload an input data file in accordance to the file formats and conventions. Alternatively, download any of the sample data files from 
+			<a href="{{ url_for('download_file', filename='jellyroll.txt') }}">here</a> and <a href="{{ url_for('download_file', filename='alphaNew.txt') }}">here</a> 
+			and click on the 'Upload and compare methods' button to view the results page.</li>
+			
+			<li>View and analyze results using all the visualizations on the results page. The results for the sample 2 dimensional dataset consisting of 150 points can 
+			be found <a href="{{ url_for('visualize') }}" target="_blank">here</a></li>
+			
+			<li>If input data is a genetic sequence FASTA file, use the scree plot generator link on the results page to determine the dimensionality to embed the 
+			sequence data. Select required distance type and dimension count to compute results. Additionally, the parameters associated with individual techniques can 
+			be tuned to view recomputed results. Click on the 'Compute' button on the top-right corner of the results page to refresh the computed values after 
+			changing any parameters
+			
+			</li>
+			
+			<li>Download all the important result values in the form of a Word document by clicking on the 'Download Results' link on the top-left corner of the results page.</li>
+			
+		</ul>
+		
+		
+	</div>
+	</div>   
+	{% endblock %}
+</body>
+</html>

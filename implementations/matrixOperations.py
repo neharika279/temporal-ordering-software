@@ -14,6 +14,7 @@ import random
 from scipy.spatial.distance import hamming
 from sklearn.manifold import MDS
 import sequence_distance as seq
+from sklearn.preprocessing import Imputer
 
 UPLOAD_FOLDER = 'C:\Users\Public'
 def path_length(path, distmtx, seglengths=None):
@@ -85,10 +86,7 @@ def pperm_shallow(pnode):
     return list(permute_iter(pnode))
 
 def pqtree_perms(seq):
-    print "seq"
-    print seq
-    print "type of seq elements:"
-    print type(seq[0][0][0])
+    
     stack = [seq[:]]
     ischanging = True
     while ischanging:
@@ -188,18 +186,14 @@ def get_classical_MDS_eigenvals(A,dimensions):
     # find eigenvalues and eigenvectors
     for i in range(dimensions):
         eigen_val = np.linalg.eig(B)[i]
-        print "eigenval:"
-        print eigen_val
+       
         eigen_vec = np.linalg.eig(B)[i].T
-        print "eigenvector:"
-        print eigen_vec
+        
     
     # select top 2 dimensions (for example)
     PC1 = np.sqrt(eigen_val[0])*eigen_vec[0]
     PC2 = np.sqrt(eigen_val[1])*eigen_vec[1]
-    print "components:"
-    print PC1
-    print PC2
+    
 
 
 def cmdscale(D):
@@ -275,7 +269,7 @@ def parseSequenceFile(filePath,distancetype,dimension_scaling_factor):
        
         seq_distance_matrix=get_dist(seqs,distancetype)
     
-    embedding = MDS(n_components=dimension_scaling_factor)
+    embedding = MDS(n_components=dimension_scaling_factor,dissimilarity='precomputed')
     MDS_fix_matrix=embedding.fit_transform(seq_distance_matrix)
     
     #print "python MDS result"
@@ -360,6 +354,24 @@ def get_dist(seqs,distancetype):
       
     return seq_distance_matrix
         
+def preprocess(dataset):
+    
+    for i in range(len(dataset)):
+        for j in range(len(dataset[i])):
+            
+            if(dataset[i][j]==''):
+                dataset[i][j]=0.0
+                
+    imp_mean_nan = Imputer(missing_values=np.nan, strategy='mean')
+    imp_mean_zero = Imputer(missing_values=0.0, strategy='mean')
+    #imp_mean_empty = Imputer(missing_values='', strategy='mean')
+    
+    #dataset=imp_mean_empty.fit_transform(dataset)
+    dataset=imp_mean_nan.fit_transform(dataset)
+    dataset=imp_mean_zero.fit_transform(dataset)
+    
+    
+    return dataset
 
 
 def tableasrows (filename, delimiter, commentchar="#", skipinitialspace=True,
@@ -426,7 +438,8 @@ def tableasrows (filename, delimiter, commentchar="#", skipinitialspace=True,
                         raise ValueError("Unable to auto-convert table at Row %d. Try again with autoconvert=False" % i)
         else:
             rows.append(row)    
-
+    
+    rows=preprocess(np.array(rows))
     class TableData(list):
         pass
     
@@ -829,15 +842,12 @@ def calc_noise_ratio(graph,branch_list):
     
     keys=graph.keys()
     MST_points=len(keys)
-    print "MST points:"
-    print MST_points
     branch_points=0
     
     for sublist in branch_list:
         for sub_sub_list in sublist:
             branch_points += len(sub_sub_list)
-    print "branch points:"
-    print branch_points
+    
     return float(round(((branch_points/MST_points)*100),2))
 
 

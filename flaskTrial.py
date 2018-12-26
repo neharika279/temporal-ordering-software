@@ -16,12 +16,12 @@ import matplotlib.pyplot as plt
 import networkx as nx
 import path
 from sklearn.decomposition import PCA as sklearnPCA
-from implementations.executeMethods import get_indecisive_backbone,\
-    get_decisive_indecisive_nodes
+from implementations.executeMethods import get_indecisive_backbone,get_decisive_indecisive_nodes
+
 
 UPLOAD_FOLDER = 'C:\Users\Public'
 #FILE_NAME=''
-ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif','csv','fas','fasta'])
+ALLOWED_EXTENSIONS = set(['txt','csv', 'fa','fas','fasta'])
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -76,12 +76,26 @@ def home():
 
 @app.route('/downloads/<path:filename>')
 def download_file(filename):
-    
     return send_from_directory(app.config['UPLOAD_FOLDER'],filename, as_attachment=True)
+
+@app.route('/visualize')
+def visualize():
+    filePath=os.path.join(app.config['UPLOAD_FOLDER'], "jellyroll.txt")
+    session['filepath']=filePath
+    
+    session['label']='nolabel'
+    session['filetype']='option1'
+    session['method']='all'
+    
+    return redirect(url_for('exec_method_final',method='all'))
 
 @app.route("/citation")
 def citation():
     return render_template('citation.html')
+
+@app.route("/help")
+def help():
+    return render_template('help.html')
 
 @app.route("/error/<errorMessage>")
 def error(errorMessage):
@@ -92,32 +106,12 @@ def error(errorMessage):
 def show_scree_plot_page():
     return render_template('screePlot.html')
 
-@app.route("/clusterMSTFinal/<methodName>",methods=['GET', 'POST'])
-def clusterMSTFinal(methodName):
-    
-    if request.method == 'POST':
-        param_dict={}
-        #filePath=os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        param_dict["L"]= int(request.form["L"])
-        param_dict["c"]= float(request.form["c"])
-        param_dict["p"]= float(request.form["p"])
-        param_dict["mod"]= int(request.form["mod"])
-        
-        #print "took parameters. param dict::"
-        #print param_dict
-        
-        p_dict=json.dumps(param_dict)
-        
-        return render_template('finalResults.html',paramDict=p_dict,method_name=methodName)    
-    else:
-        return render_template('clusterMST.html')
-
 
 @app.route('/exec_method_final/<method>')
 def exec_method_final(method):
     
-    print "method:"
-    print method
+    #print "method:"
+    #print method
     param_dict={}
     param_dict["L"]= 10
     param_dict["c"]= 0.8
@@ -125,27 +119,11 @@ def exec_method_final(method):
     param_dict["mod"]= 5
     param_json = json.dumps(param_dict)
     filetype=session['filetype']
-#     if(method=='mst'):
-#         return render_template('finalResults.html',paramDict=param_json,method_name=method,file_type=filetype)
-#     elif(method=='cst'):
-#         return render_template('finalResults.html',paramDict=param_json,method_name=method,file_type=filetype)
-#     elif(method=='spd'):
-#         return render_template('finalResults.html',paramDict=param_json,method_name=method,file_type=filetype)
+
     if(method=='all'):
         return render_template('finalResults_new.html',paramDict=param_json,method_name=method,file_type=filetype)
 
 
-################################################################Trial results page render#####################################################################
-@app.route('/render_results_new')
-def render_results_new():
-    return render_template('results_new.html')
-
-
-@app.route('/render_results_final_new')
-def render_results_final_new():
-    return render_template('finalResults_new.html')
-    
-    
 
 @app.route('/get_serialization_values',methods=['POST'])
 def get_serialization_values():
@@ -155,8 +133,7 @@ def get_serialization_values():
     method_name=request_data["method_name"]
     distance_type=request_data["distance_type"]
     dimension_factor=request_data["dimension_factor"]
-#     print "recieved method name:"
-#     print method_name
+    
     response_data={}
     mst_values={}
     cst_values={}
@@ -296,6 +273,15 @@ def writeResultToFile(response):
     
     f.close() 
 
+
+##Takes in  5 parameters: method name, parameters for SPD, distance type for sequence data (default is hamming), the dimension count for MDS embedding (default is 3)
+##argument param_dict is a dictionary that will have the following parameter specifications:
+##L (key) : number of iterations for consensus clustering (value)
+##c (key) = threshold for cluster merging (value)
+##p (key) = threshold for concordance measure (value)
+##mod (key) = number of final modules for the seriation (value)
+##Standard values for above SPD parameters:
+##L:100; c:0.8; p:0.0002; mod:5
 def getSerialization(method_name,param_dict,distance_type,dimension_factor):
     
     progMat=[]
@@ -306,6 +292,8 @@ def getSerialization(method_name,param_dict,distance_type,dimension_factor):
      
     dataset=ex.readFromFile(filename, filetype, labeltype,distance_type,dimension_factor)
     
+    #dataset=preprocess(np.array(dataset))
+
     if(method_name=="mst"):
     
         dPath,edges,mst,branch,label_dict=ex.executeBasicMST(dataset)
@@ -335,7 +323,6 @@ def getSerialization(method_name,param_dict,distance_type,dimension_factor):
         
     return branch,mst_graph,progMat,labels_info,dPath,nodes,e,noise,intensity
 
-
  
 def analyze_final(order,graph,distance_type,dimension_factor):
     
@@ -352,13 +339,7 @@ def analyze_final(order,graph,distance_type,dimension_factor):
     
     distmat=ex.get_order_dist_mat(dataset, order)
     dimension_reading=ex.get_order_dimension_readings(dataset, order)
-    #print "order:"
-    #print order
-    #print np.array(dimension_reading)
-    #print "number of rows:"
-    #print len(dimension_reading)
-    #print "number of dimensions:"
-    #print len(dimension_reading[0])
+   
     backbone=get_indecisive_backbone(graph_new,order)
     di=get_decisive_indecisive_nodes(graph_new)
     
@@ -421,6 +402,7 @@ def analyze_all_final():
 def get_pca():
     
     pca_matrix=[]
+    error=0
     filepath=session['filepath']
     filetype=session['filetype']
     labeltype=session['label']
@@ -431,6 +413,7 @@ def get_pca():
     ordering = request_data["order"]
     distance_type=request_data["distance_type"]
     dimension_factor=request_data["dimension_factor"]
+    pca_dimension_count=request_data["pca_dimension_count"]
     
     order=ex.parse_order(ordering)
     order=list(int(k) for k in order)
@@ -443,14 +426,28 @@ def get_pca():
         pca_matrix.append(dataset[orderno])
     
     
-    sklearn_pca = sklearnPCA(n_components=3)
-    Y_sklearn = sklearn_pca.fit_transform(pca_matrix)
+    data_columns=len(pca_matrix[0])
+    if (data_columns >= pca_dimension_count):
+        sklearn_pca = sklearnPCA(n_components=pca_dimension_count)
+        Y_sklearn = sklearn_pca.fit_transform(pca_matrix)
+        final_pca_values=np.transpose(Y_sklearn)
+        final_pca_values=list(list(float(f) for f in d) for d in final_pca_values)
+    elif(data_columns == 2):
+        sklearn_pca = sklearnPCA(n_components=2)
+        Y_sklearn = sklearn_pca.fit_transform(pca_matrix)
+        final_pca_values=np.transpose(Y_sklearn)
+        final_pca_values=list(list(float(f) for f in d) for d in final_pca_values)
+    else:
+        error=1
+        final_pca_values=[]
     
-    final_pca_values=np.transpose(Y_sklearn)
-    final_pca_values=list(list(float(f) for f in d) for d in final_pca_values)
+    
+    #print "final pca values:"
+    #print np.array(final_pca_values)
     response_data={}
     response_data["pca_values"]=final_pca_values
-    
+    response_data["error_value"]=error
+   
     return json.dumps(response_data)
 
 
@@ -498,11 +495,13 @@ def get_only_distMat():
     
     request_data = json.loads(request.data)
     ordering = request_data["order"]
+    distance_type=request_data["distance_type"]
+    dimension_factor=request_data["dimension_factor"]
     
     order=ex.parse_order(ordering)
     order=list(int(k) for k in order)
     
-    alpha=ex.readFromFile(filepath, filetype, labeltype)
+    alpha=ex.readFromFile(filepath, filetype, labeltype,distance_type,dimension_factor)
     dataset=np.array(alpha)
     
     distmat=ex.get_order_dist_mat(dataset, order)

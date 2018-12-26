@@ -7,9 +7,9 @@ import matrixOperations as mop
 import spd as csp
 import cst as cs
 from scipy import stats
-import kMeansClustering as kMeans
+#import kMeansClustering as kMeans
 import json
-import progressionSimilarity as progressionSim
+#import progressionSimilarity as progressionSim
 import graphFunctions as graph
 import numpy as np
 
@@ -93,8 +93,8 @@ def executeBasicMST(alpha):
     
     distMat=get_distance_mat(alpha)
     resultGraph=mop.getMST(range(len(distMat)),distMat)
-    print "result graph:"
-    print resultGraph
+    #print "result graph:"
+    #print resultGraph
     diamPath,diamLength=mop.getDiameterPath(resultGraph,0)
     
     edges=mop.graph.edges(resultGraph)
@@ -149,6 +149,13 @@ def get_label_dict(labels):
     
     return label_dict
 
+############### Reading input data ##########################################
+##Takes in  5 parameters: input filename, input filetype, label type, distance type for sequence data, the dimension count for MDS embedding
+##argument filetype can have the following values:
+##option1 = tab separated values
+##option2 = comma separated values
+##option3 = sequence data (fasta files)
+##label/nolabel : indicates whether input data is labeled into groups/phases
 
 def readFromFile(filePath,filetype,labeltype,distancetype,dimension_scaling_factor):
     if(filetype=='option1'):
@@ -247,39 +254,39 @@ def executePQtree(filePath,filetype,labeltype,mst_graph,dpath,pqno,distance_type
     return perm_dict,total_paths,total_perm_list
 
 
-def executeClusterMST(dataSet):#(filePath,filetype):
-     
-    datasetTrans=np.transpose(dataSet)
-    
-    #algorithm starts
-    geneModulesOutput1=kMeans.getCoherentGeneModules(datasetTrans)
-  
-    geneModulesOutput1.pop(0)
-    #print "HELLOOOOOOOELLELLELELELEELEL"
-    #print np.array(geneModulesOutput1)
-    
-    
-    geneModulesFinal=kMeans.calculatePairwiseModuleCorrelation(geneModulesOutput1)
-    #print "final coherent modules len:"
-    #print np.array(geneModulesFinal)
-    #print len(geneModulesFinal)
-    
-    mst=progressionSim.getMSTlist(geneModulesFinal)
-    print ""
-    #print "mst:"
-    #print np.array(mst)
-    #print "mst list length:"
-    #print len(mst)
-    concDict=progressionSim.getProgressionSimilarityDict(geneModulesFinal,mst)
-    #print "concdict:"
-    #print concDict
-    progMat=progressionSim.getProgressionSimilarityMatrix(geneModulesFinal,concDict)
-    print ""
-    print "progression matrix:"
-    print np.array(progMat)
-    print ""
-    print "length of progression matrix:"
-    print len(progMat)
+# def executeClusterMST(dataSet):#(filePath,filetype):
+#      
+#     datasetTrans=np.transpose(dataSet)
+#     
+#     #algorithm starts
+#     geneModulesOutput1=kMeans.getCoherentGeneModules(datasetTrans)
+#   
+#     geneModulesOutput1.pop(0)
+#     #print "HELLOOOOOOOELLELLELELELEELEL"
+#     #print np.array(geneModulesOutput1)
+#     
+#     
+#     geneModulesFinal=kMeans.calculatePairwiseModuleCorrelation(geneModulesOutput1)
+#     #print "final coherent modules len:"
+#     #print np.array(geneModulesFinal)
+#     #print len(geneModulesFinal)
+#     
+#     mst=progressionSim.getMSTlist(geneModulesFinal)
+#     print ""
+#     #print "mst:"
+#     #print np.array(mst)
+#     #print "mst list length:"
+#     #print len(mst)
+#     concDict=progressionSim.getProgressionSimilarityDict(geneModulesFinal,mst)
+#     #print "concdict:"
+#     #print concDict
+#     progMat=progressionSim.getProgressionSimilarityMatrix(geneModulesFinal,concDict)
+#     print ""
+#     print "progression matrix:"
+#     print np.array(progMat)
+#     print ""
+#     print "length of progression matrix:"
+#     print len(progMat)
     
 def cst(dataset):
     
@@ -432,61 +439,4 @@ def get_indecisive_backbone(mst,dpath):
 def get_decisive_indecisive_nodes(mst):
     return mop.decisive_indecisive(mst)
 
-# def delete_this_later():
-#      
-#     data=readFromFile("alpha.txt", "option1", "label")
-#     diamPath,edges,resultGraph,branch,label_dict=executeBasicMST(data)
-#     backbone=get_indecisive_backbone(resultGraph, diamPath)
-#     print backbone
-#     print len(backbone)
-#     di=get_decisive_indecisive_nodes(resultGraph)
-#     print "di:"
-#     print di
-#      
-# delete_this_later()
 
-# def tryth():
-#     
-#     data=readFromFile("alphamod.txt", "option1", "label")
-#     #print data
-#     distMat=get_distance_mat(data)
-#     #dpath,cst_edges,label_dict,graph,branch=cst(data)
-#     dpath,edges,graph,branch,label_dict=executeBasicMST(data)
-#     
-#     tupDiampath=tuple(dpath)
-#     
-#     
-#     print "graph:"
-#     print graph
-#     print "edges:"
-#     print edges
-#     
-#     pqtree = mop.make_pqtree(graph)
-#     
-#     
-#     
-#     results=mop.diameterpath_branches(graph, tupDiampath)
-#     
-#      
-#     branchList=results.branches.values()
-#      
-#     if all(subList==[] for subList in branchList):
-#         print "no branch exists"
-#        
-#     else:
-#         print"branch exists"
-#         #print "branches:" 
-#         #print len(branchList)
-#         #for sublist in branchList:
-#         #    print sublist
-#         pqperm = mop.pqtree_perms(pqtree)
-#         print ""
-#         #print "pq_perm::"
-#         #print pqperm
-#         rpaths = mop.rank_paths(pqperm, distMat)
-#          
-#         for i in range(3):
-#             print i, rpaths.paths[i], rpaths.lengths[i]
-
-
-#tryth()

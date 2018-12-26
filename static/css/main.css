@@ -66,6 +66,15 @@ div.about {
     font-family: Arial, Helvetica, Verdana, sans-serif;
 }
 
+#standard h2 {
+    margin-bottom: 6px;
+    margin-top: 30px;
+    font-size: 130%;
+    color: #808000;
+    float:left;
+    font-family: Arial, Helvetica, Verdana, sans-serif;
+}
+
 #standard ul {
     margin: 2px 0 4px 2px;
 }
@@ -74,7 +83,9 @@ div.about {
     float: left;
     width: 500px;
     padding: 10px 20px 10px 40px;
+    
 }
+
 
 #column_b {
     width: 900px;
@@ -289,4 +300,12 @@ table, td {
 	color: black;
 	font-size: 35px;
 	cursor: pointer;
+}
+.draw_scree {
+	width: 800px;
+	height: 510px;
+	margin: 0 auto;
+	text-align:center;
+	vertical-align: middle;
+	padding-top: 50px;
 }
