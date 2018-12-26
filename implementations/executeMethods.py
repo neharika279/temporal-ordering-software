@@ -7,9 +7,9 @@ import matrixOperations as mop
 import spd as csp
 import cst as cs
 from scipy import stats
-import kMeansClustering as kMeans
+#import kMeansClustering as kMeans
 import json
-import progressionSimilarity as progressionSim
+#import progressionSimilarity as progressionSim
 import graphFunctions as graph
 import numpy as np
 
@@ -93,8 +93,8 @@ def executeBasicMST(alpha):
     
     distMat=get_distance_mat(alpha)
     resultGraph=mop.getMST(range(len(distMat)),distMat)
-    print "result graph:"
-    print resultGraph
+    #print "result graph:"
+    #print resultGraph
     diamPath,diamLength=mop.getDiameterPath(resultGraph,0)
     
     edges=mop.graph.edges(resultGraph)
@@ -254,39 +254,39 @@ def executePQtree(filePath,filetype,labeltype,mst_graph,dpath,pqno,distance_type
     return perm_dict,total_paths,total_perm_list
 
 
-def executeClusterMST(dataSet):#(filePath,filetype):
-     
-    datasetTrans=np.transpose(dataSet)
-    
-    #algorithm starts
-    geneModulesOutput1=kMeans.getCoherentGeneModules(datasetTrans)
-  
-    geneModulesOutput1.pop(0)
-    #print "HELLOOOOOOOELLELLELELELEELEL"
-    #print np.array(geneModulesOutput1)
-    
-    
-    geneModulesFinal=kMeans.calculatePairwiseModuleCorrelation(geneModulesOutput1)
-    #print "final coherent modules len:"
-    #print np.array(geneModulesFinal)
-    #print len(geneModulesFinal)
-    
-    mst=progressionSim.getMSTlist(geneModulesFinal)
-    print ""
-    #print "mst:"
-    #print np.array(mst)
-    #print "mst list length:"
-    #print len(mst)
-    concDict=progressionSim.getProgressionSimilarityDict(geneModulesFinal,mst)
-    #print "concdict:"
-    #print concDict
-    progMat=progressionSim.getProgressionSimilarityMatrix(geneModulesFinal,concDict)
-    print ""
-    print "progression matrix:"
-    print np.array(progMat)
-    print ""
-    print "length of progression matrix:"
-    print len(progMat)
+# def executeClusterMST(dataSet):#(filePath,filetype):
+#      
+#     datasetTrans=np.transpose(dataSet)
+#     
+#     #algorithm starts
+#     geneModulesOutput1=kMeans.getCoherentGeneModules(datasetTrans)
+#   
+#     geneModulesOutput1.pop(0)
+#     #print "HELLOOOOOOOELLELLELELELEELEL"
+#     #print np.array(geneModulesOutput1)
+#     
+#     
+#     geneModulesFinal=kMeans.calculatePairwiseModuleCorrelation(geneModulesOutput1)
+#     #print "final coherent modules len:"
+#     #print np.array(geneModulesFinal)
+#     #print len(geneModulesFinal)
+#     
+#     mst=progressionSim.getMSTlist(geneModulesFinal)
+#     print ""
+#     #print "mst:"
+#     #print np.array(mst)
+#     #print "mst list length:"
+#     #print len(mst)
+#     concDict=progressionSim.getProgressionSimilarityDict(geneModulesFinal,mst)
+#     #print "concdict:"
+#     #print concDict
+#     progMat=progressionSim.getProgressionSimilarityMatrix(geneModulesFinal,concDict)
+#     print ""
+#     print "progression matrix:"
+#     print np.array(progMat)
+#     print ""
+#     print "length of progression matrix:"
+#     print len(progMat)
     
 def cst(dataset):
     
