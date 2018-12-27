@@ -17,14 +17,15 @@ import networkx as nx
 import path
 from sklearn.decomposition import PCA as sklearnPCA
 from implementations.executeMethods import get_indecisive_backbone,get_decisive_indecisive_nodes
+import faulthandler
+from implementations import config
 
 
-UPLOAD_FOLDER = 'C:\Users\Public'
-#FILE_NAME=''
 ALLOWED_EXTENSIONS = set(['txt','csv', 'fa','fas','fasta'])
 
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['UPLOAD_FOLDER'] = config.UPLOAD_FOLDER
+
 #app.config['FILE_NAME'] = FILE_NAME
 
 def allowed_file(filename):
@@ -141,7 +142,7 @@ def get_serialization_values():
     
     if(method_name=="mst"):
         
-        mst_branch,mst_graph,mst_progMat,mst_labels_info,mst_dPath,mst_nodes,mst_e,mst_noise,mst_intensity=getSerialization("mst", param_dict,distance_type,dimension_factor)
+        mst_branch,mst_graph,mst_progMat,mst_labels_info,mst_dPath,mst_nodes,mst_e,mst_noise,mst_intensity,mst_dlen=getSerialization("mst", param_dict,distance_type,dimension_factor)
         
         mst_values["branch"]=mst_branch
         mst_values["graph"]=mst_graph
@@ -157,7 +158,7 @@ def get_serialization_values():
         
     elif(method_name=="cst"):
         
-        cst_branch,cst_graph,cst_progMat,cst_labels_info,cst_dPath,cst_nodes,cst_e,cst_noise,cst_intensity=getSerialization("cst", param_dict,distance_type,dimension_factor)
+        cst_branch,cst_graph,cst_progMat,cst_labels_info,cst_dPath,cst_nodes,cst_e,cst_noise,cst_intensity,cst_dlen=getSerialization("cst", param_dict,distance_type,dimension_factor)
         
         cst_values["branch"]=cst_branch
         cst_values["graph"]=cst_graph
@@ -173,7 +174,7 @@ def get_serialization_values():
         
     elif(method_name=="spd"):
         
-        spd_branch,spd_graph,spd_progMat,spd_labels_info,spd_dPath,spd_nodes,spd_e,spd_noise,spd_intensity=getSerialization("spd", param_dict,distance_type,dimension_factor)
+        spd_branch,spd_graph,spd_progMat,spd_labels_info,spd_dPath,spd_nodes,spd_e,spd_noise,spd_intensity,spd_dlen=getSerialization("spd", param_dict,distance_type,dimension_factor)
         
         spd_values["branch"]=spd_branch
         spd_values["graph"]=spd_graph
@@ -189,9 +190,9 @@ def get_serialization_values():
     
     elif(method_name=="all"):
         
-        mst_branch,mst_graph,mst_progMat,mst_labels_info,mst_dPath,mst_nodes,mst_e,mst_noise,mst_intensity=getSerialization("mst", param_dict,distance_type,dimension_factor)
-        cst_branch,cst_graph,cst_progMat,cst_labels_info,cst_dPath,cst_nodes,cst_e,cst_noise,cst_intensity=getSerialization("cst", param_dict,distance_type,dimension_factor)
-        spd_branch,spd_graph,spd_progMat,spd_labels_info,spd_dPath,spd_nodes,spd_e,spd_noise,spd_intensity=getSerialization("spd", param_dict,distance_type,dimension_factor)
+        mst_branch,mst_graph,mst_progMat,mst_labels_info,mst_dPath,mst_nodes,mst_e,mst_noise,mst_intensity,mst_dlen=getSerialization("mst", param_dict,distance_type,dimension_factor)
+        cst_branch,cst_graph,cst_progMat,cst_labels_info,cst_dPath,cst_nodes,cst_e,cst_noise,cst_intensity,cst_dlen=getSerialization("cst", param_dict,distance_type,dimension_factor)
+        spd_branch,spd_graph,spd_progMat,spd_labels_info,spd_dPath,spd_nodes,spd_e,spd_noise,spd_intensity,spd_dlen=getSerialization("spd", param_dict,distance_type,dimension_factor)
         
         mst_values["branch"]=mst_branch
         mst_values["graph"]=mst_graph
@@ -202,6 +203,7 @@ def get_serialization_values():
         mst_values["edges"]=mst_e
         mst_values["noise"]=mst_noise
         mst_values["intensity"]=mst_intensity
+        mst_values["dlen"]=mst_dlen
         
         cst_values["branch"]=cst_branch
         cst_values["graph"]=cst_graph
@@ -212,6 +214,7 @@ def get_serialization_values():
         cst_values["edges"]=cst_e
         cst_values["noise"]=cst_noise
         cst_values["intensity"]=cst_intensity
+        cst_values["dlen"]=cst_dlen
         
         spd_values["branch"]=spd_branch
         spd_values["graph"]=spd_graph
@@ -222,6 +225,7 @@ def get_serialization_values():
         spd_values["edges"]=spd_e
         spd_values["noise"]=spd_noise
         spd_values["intensity"]=spd_intensity
+        spd_values["dlen"]=spd_dlen
         
         response_data["mst"]=mst_values
         response_data["cst"]=cst_values
@@ -236,14 +240,19 @@ def writeResultToFile(response):
     
     method_name=response["method_name"]
     filePath=os.path.join(app.config['UPLOAD_FOLDER'], "results.txt")
-    f = open(filePath, "w")
+    exists = os.path.isfile(filePath)
+    if exists:
+        f = open(filePath, "a")
+    else:
+        f = open(filePath, "w")
     if method_name=="all":
         
         methodValues_mst=response["mst"];
         f.write("mst method:\n")
         f.write("graph created:"+str(methodValues_mst["graph"])+"\n")
         f.write("diameter path ordering:"+str(methodValues_mst["dpath"])+"\n")
-        f.write("noise percentage:"+str(methodValues_mst["noise"]))
+        f.write("diameter path length:"+str(methodValues_mst["dlen"])+"\n")
+        f.write("noise percentage:"+str(methodValues_mst["noise"])+"\n")
         f.write("sampling intensity:"+str(methodValues_mst["intensity"])+"\n")
         f.write("\n")
         
@@ -251,16 +260,14 @@ def writeResultToFile(response):
         f.write("cst method:\n")
         f.write("graph created:"+str(methodValues_cst["graph"])+"\n")
         f.write("diameter path ordering:"+str(methodValues_cst["dpath"])+"\n")
-        f.write("noise percentage:"+str(methodValues_cst["noise"])+"\n")
-        f.write("sampling intensity:"+str(methodValues_cst["intensity"])+"\n")
+        f.write("diameter path length:"+str(methodValues_cst["dlen"])+"\n")
         f.write("\n")
         
         methodValues_spd=response["spd"];
         f.write("spd method:\n")
         f.write("graph created:"+str(methodValues_spd["graph"])+"\n")
         f.write("diameter path ordering:"+str(methodValues_spd["dpath"])+"\n")
-        f.write("noise percentage:"+str(methodValues_spd["noise"])+"\n")
-        f.write("sampling intensity:"+str(methodValues_spd["intensity"])+"\n")
+        f.write("diameter path length:"+str(methodValues_spd["dlen"])+"\n")
         f.write("\n")
     else:
         methodValues=response[method_name];
@@ -296,15 +303,15 @@ def getSerialization(method_name,param_dict,distance_type,dimension_factor):
 
     if(method_name=="mst"):
     
-        dPath,edges,mst,branch,label_dict=ex.executeBasicMST(dataset)
+        dPath,edges,mst,branch,label_dict,dlen=ex.executeBasicMST(dataset)
     
     elif(method_name=="cst"):
         
-        dPath,edges,label_dict,mst,branch=ex.cst(dataset)
+        dPath,edges,label_dict,mst,branch,dlen=ex.cst(dataset)
         
     elif(method_name=="spd"):
         
-        dPath,edges,label_dict,progMat,mst,branch=ex.spd(dataset,param_dict)
+        dPath,edges,label_dict,progMat,mst,branch,dlen=ex.spd(dataset,param_dict)
         
      
     
@@ -321,7 +328,7 @@ def getSerialization(method_name,param_dict,distance_type,dimension_factor):
         temp_list=[float(x) for x in temp_list]
         input_dict[i]=temp_list
         
-    return branch,mst_graph,progMat,labels_info,dPath,nodes,e,noise,intensity
+    return branch,mst_graph,progMat,labels_info,dPath,nodes,e,noise,intensity,dlen
 
  
 def analyze_final(order,graph,distance_type,dimension_factor):
@@ -353,6 +360,13 @@ def analyze_final(order,graph,distance_type,dimension_factor):
     result["di"]=di_json
     result["nodes"]=nodes
     result["edges"]=e
+    
+    filePath=os.path.join(app.config['UPLOAD_FOLDER'], "results.txt")
+    f = open(filePath, "a")
+    f.write("Pairwise distance matrix for each row in the input data for the ordering"+str(order)+":\n")
+    f.write(str(distmat)+"\n")
+    f.write("Maximum distance value:"+str(np.array(distmat).max())+","+"Minimum distance value:"+str(np.array(distmat).min())+"\n\n")
+    f.close()
     
     return result
 
@@ -444,6 +458,12 @@ def get_pca():
     
     #print "final pca values:"
     #print np.array(final_pca_values)
+    filePath=os.path.join(app.config['UPLOAD_FOLDER'], "results.txt")
+    f = open(filePath, "a")
+    f.write("PCA matrix for the ordering"+str(order)+"for "+str(len(final_pca_values))+"principal components:\n")
+    f.write(str(np.transpose(final_pca_values))+"\n\n")
+    f.close()
+    
     response_data={}
     response_data["pca_values"]=final_pca_values
     response_data["error_value"]=error
@@ -574,19 +594,19 @@ def exec_pq_trees_final():
     
     filePath=os.path.join(app.config['UPLOAD_FOLDER'], "results.txt")
     f = open(filePath, "a")
-    f.write("Alternate orderings using PQ trees for method: "+method_name+"\n")
+    f.write("Alternate orderings using PQ trees:")
     
     if method_name=="mst":
-        branch,graph_new,progMat,labels_info,dpath,nodes,e,noise,intensity=getSerialization("mst", param_dict,distance_type,dimension_factor)  
+        branch,graph_new,progMat,labels_info,dpath,nodes,e,noise,intensity,dlen=getSerialization("mst", param_dict,distance_type,dimension_factor)  
     elif method_name=="cst":
-        branch,graph_new,progMat,labels_info,dpath,nodes,e,noise,intensity=getSerialization("cst", param_dict,distance_type,dimension_factor)
+        branch,graph_new,progMat,labels_info,dpath,nodes,e,noise,intensity,dlen=getSerialization("cst", param_dict,distance_type,dimension_factor)
     elif method_name=="spd":
-        branch,graph_new,progMat,labels_info,dpath,nodes,e,noise,intensity=getSerialization("spd", param_dict,distance_type,dimension_factor)
+        branch,graph_new,progMat,labels_info,dpath,nodes,e,noise,intensity,dlen=getSerialization("spd", param_dict,distance_type,dimension_factor)
         
     filename=session['filepath']
     filetype=session['filetype']
     labeltype=session['label']
-    pq_ranks,total_paths,total_perms=ex.executePQtree(filename,filetype,labeltype,graph_new,dpath,int(pqnum),distance_type,dimension_factor)
+    pq_ranks,total_paths,total_perms,path_length_list=ex.executePQtree(filename,filetype,labeltype,graph_new,dpath,int(pqnum),distance_type,dimension_factor)
     f.write("Total number of alternate orderings generated: "+str(total_paths)+"\n")
     f.write("Orderings:"+"\n")
     
@@ -600,10 +620,12 @@ def exec_pq_trees_final():
         
     if total_perms:
         for perm in total_perms:
-            f.write(str(perm)+"\n")
+            f.write(str(perm)+",")
+            f.write(str(path_length_list[total_perms.index(perm)])+"\n")
     
     pq_orders=json.dumps(pq_orderings)
     pq=json.dumps(pq_ranks)
+    f.write("\n")
     f.close()
 
     response_data={}
@@ -615,8 +637,9 @@ def exec_pq_trees_final():
 
 #trythis()
 if __name__ == '__main__':
+    faulthandler.enable()
     app.secret_key = 'super secret key'
     app.config['SESSION_TYPE'] = 'filesystem'
  
     #session.init_app(app)
-    app.run(debug=True)
+    app.run(host='127.0.0.1', port=9000)

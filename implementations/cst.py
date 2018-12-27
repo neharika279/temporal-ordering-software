@@ -8,7 +8,7 @@ from sklearn.cluster import AgglomerativeClustering
 import numpy as np
 from scipy.cluster import hierarchy
 from helper_functions import get_diameter_path
-import numpy.matlib
+#import numpy.matlib
 from scipy.sparse import csr_matrix
 
 def run_cst(data,affinity,linkage,merge_method):
@@ -45,6 +45,7 @@ def merge_clusters(Z,data,affinity,merge_method):
         #print 
         c1 = nodes[int(c1)]
         c2 = nodes[int(c2)]
+        
         link = get_linkage(c1,c2,data,affinity,method=merge_method)    
         #print "output of linkage:"
         #print link    
@@ -90,12 +91,12 @@ def nearest_neighbors_linkage(c1,c2,data,affinity):
     return link
     
 def centroid_points_linkage(c1,c2,data,affinity):
-    #print "c1:"
-    #print c1
+    
     c1_points = data[c1,:]
     c2_points = data[c2,:]
-    centroid_1 = np.mean(c1_points,0)
-    centroid_2 = np.mean(c2_points,0)
+    
+    centroid_1 = [np.mean(c1_points,0)]
+    centroid_2 = [np.mean(c2_points,0)]
     
     centroid_dists1 = pairwise_distances(c1_points,Y=centroid_2,metric=affinity)
     centroid_dists2 = pairwise_distances(c2_points,Y=centroid_1,metric=affinity)
@@ -115,8 +116,8 @@ def weighted_centroids_linkage(c1,c2,data,affinity,lambda_val):
     centroid_dists1 = pairwise_distances(c1_points,Y=centroid_2,metric=affinity)
     centroid_dists2 = pairwise_distances(c2_points,Y=centroid_1,metric=affinity)
     
-    cent_dists1 = np.matlib.repmat(centroid_dists1, 1, len(c2)) * lambda_val
-    cent_dists2 = np.matlib.repmat(centroid_dists2, 1, len(c1)).T * lambda_val
+    cent_dists1 = np.repmat(centroid_dists1, 1, len(c2)) * lambda_val
+    cent_dists2 = np.repmat(centroid_dists2, 1, len(c1)).T * lambda_val
     
     dists = pairwise_distances(c1_points,Y=c2_points,metric=affinity)
     dists = dists + cent_dists1 + cent_dists2

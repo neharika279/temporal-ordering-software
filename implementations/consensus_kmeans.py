@@ -58,7 +58,7 @@ def consensus_kmeans_recursive( data,indices, L, c1,affinity ):
 def compute_average_correlation(data,affinity):
     
     dists = []
-    centroid = np.mean(data,0)
+    centroid = [np.mean(data,0)]
     dists = pairwise_distances(data,Y=centroid,metric="correlation")
         
     dists = 1-dists

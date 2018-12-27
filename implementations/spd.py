@@ -60,7 +60,7 @@ def run_spd(data,affinity,L,c1,p_thresh,mod_size_cutoff):
 
     #new_mst = minimum_spanning_tree(new_dists)
     #path = get_diameter_path(new_mst)
-    return diamPath,graph_dict_mst,similar_progressions
+    return diamPath,graph_dict_mst,similar_progressions,diamLength
 
 def compute_similar_progressions(concordance_table,msts,p_thresh):
     concordant = concordance_table <= p_thresh
