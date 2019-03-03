@@ -718,7 +718,8 @@ function drawScree(response,divId){
 	var trace= {
 			x:xaxis,
 			y:eigenvals,
-			type: 'scattergl'
+			type: 'scattergl',
+			mode: 'lines+markers'
 	};
 	
 	data.push(trace);

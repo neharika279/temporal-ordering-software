@@ -642,4 +642,4 @@ if __name__ == '__main__':
     app.config['SESSION_TYPE'] = 'filesystem'
  
     #session.init_app(app)
-    app.run(host='127.0.0.1', port=9000)
+    app.run(host=config.DEFAULT_HOST, port=config.DEFAULT_PORT)
