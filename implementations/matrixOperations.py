@@ -15,8 +15,9 @@ from scipy.spatial.distance import hamming
 from sklearn.manifold import MDS
 import sequence_distance as seq
 from sklearn.preprocessing import Imputer
+import config
 
-UPLOAD_FOLDER = 'C:\Users\Public'
+UPLOAD_FOLDER = config.UPLOAD_FOLDER
 def path_length(path, distmtx, seglengths=None):
     """path, distance matrix -> length of path (optional: segment lengths)
     
@@ -272,21 +273,14 @@ def parseSequenceFile(filePath,distancetype,dimension_scaling_factor):
     embedding = MDS(n_components=dimension_scaling_factor,dissimilarity='precomputed')
     MDS_fix_matrix=embedding.fit_transform(seq_distance_matrix)
     
-    #print "python MDS result"
-    #print MDS_fix_matrix
-    #print "size:"
-    #print len(MDS_fix_matrix)
     
-    #Y,eigenvals=cmdscale(seq_distance_matrix)
-    #print "classical MDS result:"
-    #print np.array(Y)
-    #print "size:"
-    #print len(Y)
-    #print "eigenvalues calculated:"
-    #print eigenvals
-    
-    #print "classical MDS result2::::::"
-    #get_classical_MDS_eigenvals(seq_distance_matrix, 3)
+    filePath=os.path.join(UPLOAD_FOLDER, "results.txt")
+    f_res = open(filePath, "a")
+    f_res.write("Genetic distance matrix for distance type "+distancetype+":\n")
+    f_res.write(str(np.array(seq_distance_matrix))+"\n\n")
+    f_res.write("MDS embedded co-ordinate points in "+str(dimension_scaling_factor)+"space:\n")
+    f_res.write(str(np.array(MDS_fix_matrix))+"\n\n")
+    f_res.close()
     
     filePath=os.path.join(UPLOAD_FOLDER, "temp_MDS_file.txt")
     f = open(filePath, "w")

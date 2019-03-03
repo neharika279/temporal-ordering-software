@@ -101,7 +101,7 @@ def executeBasicMST(alpha):
     
     branch,branchList=findBranch(resultGraph,diamPath)
     
-    return diamPath,edges,resultGraph,branch,label_dict
+    return diamPath,edges,resultGraph,branch,label_dict,diamLength
 
 
 def get_distance_mat(dataset):
@@ -232,6 +232,7 @@ def executePQtree(filePath,filetype,labeltype,mst_graph,dpath,pqno,distance_type
         print"branch exists"
         perm_list=[]
         total_perm_list=[]
+        path_length_list=[]
         pqtree = mop.make_pqtree(mst_graph)
         
         pqperm = mop.pqtree_perms(pqtree)
@@ -244,14 +245,15 @@ def executePQtree(filePath,filetype,labeltype,mst_graph,dpath,pqno,distance_type
         
         for j in range(total_paths):
             #print i, rpaths.paths[i], rpaths.lengths[i]
-            total_perm_list.append(list(reversed(rpaths.paths[j])))     
+            total_perm_list.append(list(reversed(rpaths.paths[j])))  
+            path_length_list.append(rpaths.lengths[j])   
      
     l=len(perm_list)
     for i in range(l):
         curr_perm=[int(k) for k in perm_list[i]]
         perm_dict[i]=curr_perm
          
-    return perm_dict,total_paths,total_perm_list
+    return perm_dict,total_paths,total_perm_list,path_length_list
 
 
 # def executeClusterMST(dataSet):#(filePath,filetype):
@@ -304,19 +306,21 @@ def cst(dataset):
     graph=get_dict(tcsr)
     cst_edges=mop.graph.edges(graph)
     
-    temp_list=[]
-    for p in path:
-        a,b=p
-        if a not in temp_list:
-            temp_list.append(int(a)) 
-        if b not in temp_list:
-            temp_list.append(int(b))
     
-    dpath=temp_list
+    dpath,dlen=mop.getDiameterPath(graph,0)
+#     temp_list=[]
+#     for p in path:
+#         a,b=p
+#         if a not in temp_list:
+#             temp_list.append(int(a)) 
+#         if b not in temp_list:
+#             temp_list.append(int(b))
+#     
+#     dpath=temp_list
     
     branch,branchList=findBranch(graph, dpath)
     
-    return dpath,cst_edges,label_dict,graph,branch
+    return dpath,cst_edges,label_dict,graph,branch,dlen
 
 def get_edges(graph):
     return mop.graph.edges(graph)
@@ -357,7 +361,7 @@ def spd(dataset,param_dict):
     
     dataset = stats.zscore(dataset)
     dataset = np.nan_to_num(dataset)
-    dpath,graph,progMat=csp.run_spd(dataset, "euclidean", param.get('L'), param.get('c'), param.get('p'), param.get('mod'))
+    dpath,graph,progMat,dlen=csp.run_spd(dataset, "euclidean", param.get('L'), param.get('c'), param.get('p'), param.get('mod'))
      
     result_progMat=list(list(d) for d in progMat)
     
@@ -377,7 +381,7 @@ def spd(dataset,param_dict):
 #     dpath=temp_list
     #branch,branchList=findBranch(graph, dpath)
     branch=1
-    return dpath,spd_edges,label_dict,result_progMat,graph,branch
+    return dpath,spd_edges,label_dict,result_progMat,graph,branch,dlen
 
 
 def get_order_dist_mat(dataset,ordering):
