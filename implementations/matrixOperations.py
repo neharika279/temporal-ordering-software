@@ -12,6 +12,7 @@ from scipy.sparse.csgraph import minimum_spanning_tree
 import graphFunctions as graph
 import random
 from scipy.spatial.distance import hamming
+from sklearn.metrics.pairwise import euclidean_distances
 from sklearn.manifold import MDS
 import sequence_distance as seq
 from sklearn.preprocessing import Imputer
@@ -150,11 +151,7 @@ def get_int_values_for_pqnodes(seq):
                     i=[int(y) for y in i]
                 else:
                     i=int(i)
-    
-    #print "exterior seq:"
-    #print type(seq[0])
-    #print "interior perm:"
-    #print type(seq[0][0])    
+      
     return seq
 
 def getGraph():
@@ -165,11 +162,8 @@ def getGraph():
     for r in reader:
         rows.append(r)
         
-    print rows
+    #print rows
     arrRow=np.array(rows,dtype=float)
-#     print arrRow
-#     print arrRow.shape
-#     print "shape:"
     return arrRow
 
 
@@ -267,6 +261,8 @@ def parseSequenceFile(filePath,distancetype,dimension_scaling_factor):
     else:
         print filePath
         seqs=parseInput(filePath,False)
+        print "number of seqs read::::"
+        print len(seqs)
        
         seq_distance_matrix=get_dist(seqs,distancetype)
     
@@ -491,12 +487,13 @@ def seq_astype (seq, type=int, na=False, nastring="NA", navalue=-999):
 
     
 def getDistanceMatrix(dataset):
-    Q = np.inner(dataset,dataset)
-    diag = np.diagonal(Q)
-   
-    R = np.ones(Q.shape)*diag
-   
-    return np.sqrt(R+np.transpose(R) - 2*Q)
+#     Q = np.inner(dataset,dataset)
+#     diag = np.diagonal(Q)
+#    
+#     R = np.ones(Q.shape)*diag
+#    
+#     return np.sqrt(R+np.transpose(R) - 2*Q)
+    return euclidean_distances(dataset,dataset)
 
 
 def getMST(V,W):
@@ -859,7 +856,8 @@ def calc_sampling_intesity_ratio(graph,diamPath):
         
     
    
-    
+    print "diamPath[1]::::"
+    print diamPath[1]
     avg_path_len=round(total_path_len/path_num,2)
     intensity_ratio=round(avg_path_len/diamPath[1],2)
     return intensity_ratio
