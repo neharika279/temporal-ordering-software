@@ -24,8 +24,8 @@ def run_cst(data,affinity,linkage,merge_method):
 #    i = longest / len(data)
 #    j = longest % len(data)
     
-    path = get_diameter_path(csr_matrix(Tcsr))
-    return path,Tcsr
+    #path = get_diameter_path(csr_matrix(Tcsr))
+    return Tcsr
     
     
 def merge_clusters(Z,data,affinity,merge_method):

@@ -25,11 +25,6 @@ def get_nodes_and_edges(edges):
         temp_list.append(int(b))
     
     node_list=list(set(temp_list))
-    #print "len of node list:"
-    #print len(node_list)
-    #print "node list:"
-    #print node_list
-    #session['node_list'] = node_list
 
     edge_list=list(edges)
     l=len(edge_list)
@@ -61,10 +56,7 @@ def get_complete_ordering(dPath,mst):
      
     if all(subList==[] for subList in branchList):
         print "no branch exists"
-#         print "temporal ordering:"
-#         print diamPath
-#         print "length:"
-#         print diamPath[1]
+
     else:
         print"branch exists"
         #print "branches:" 
@@ -76,8 +68,7 @@ def get_complete_ordering(dPath,mst):
                     if k:
                         for z in k:
                             ordering[i].append(int(z))
-    #print "ordering:"
-    #print ordering 
+   
     
     return ordering   
 
@@ -109,10 +100,7 @@ def get_distance_mat(dataset):
 
 def findBranch(resultGraph,diamPath):
     
-    #print "branch functn graph:"
-    #print resultGraph
-    #print "branch diampath:"
-    #print diamPath
+
     branch=0
     tupDiampath=tuple(diamPath)
     results=mop.diameterpath_branches(resultGraph, tupDiampath)
@@ -130,8 +118,7 @@ def get_label_dict(labels):
     
     label_dict={}
     unique_labels=list(set(labels))
-    #print labels
-    #print unique_labels
+
     
     for lab in range(len(unique_labels)):
         
@@ -143,9 +130,7 @@ def get_label_dict(labels):
                 temp_label_list.append(int(l))
     
         label_dict[lab]=list(temp_label_list)
-    #print ""
-    #print "label_dict:"
-    #print label_dict
+   
     
     return label_dict
 
@@ -181,12 +166,8 @@ def fetchScreeCoordinates(filename,distancetype):
  
 def readFromFileSequenceData(filePath,distancetype,dimension_scaling_factor):
     
-    #print 'found fasta file'
     alpha=mop.parseSequenceFile(filePath,distancetype,dimension_scaling_factor)
-    #print "returned alpha"
-    #print alpha
-       
-    
+   
     return alpha
  
  
@@ -199,13 +180,8 @@ def get_path_stats(resultGraph):
     #alpha=readFromFile(filepath, filetype)
     
     diamPath,diamLength=mop.getDiameterPath(resultGraph,0)
-#     print "diamPath,diamLength"
-#     print diamPath
-#     print diamLength
+
     branch,branchList=findBranch(resultGraph, diamPath)
-#     print "branch,branchlist:"
-#     print branch
-#     print branchList
     
     if branch==1:
         noise_to_signal_ratio=mop.calc_noise_ratio(resultGraph, branchList)
@@ -255,40 +231,6 @@ def executePQtree(filePath,filetype,labeltype,mst_graph,dpath,pqno,distance_type
          
     return perm_dict,total_paths,total_perm_list,path_length_list
 
-
-# def executeClusterMST(dataSet):#(filePath,filetype):
-#      
-#     datasetTrans=np.transpose(dataSet)
-#     
-#     #algorithm starts
-#     geneModulesOutput1=kMeans.getCoherentGeneModules(datasetTrans)
-#   
-#     geneModulesOutput1.pop(0)
-#     #print "HELLOOOOOOOELLELLELELELEELEL"
-#     #print np.array(geneModulesOutput1)
-#     
-#     
-#     geneModulesFinal=kMeans.calculatePairwiseModuleCorrelation(geneModulesOutput1)
-#     #print "final coherent modules len:"
-#     #print np.array(geneModulesFinal)
-#     #print len(geneModulesFinal)
-#     
-#     mst=progressionSim.getMSTlist(geneModulesFinal)
-#     print ""
-#     #print "mst:"
-#     #print np.array(mst)
-#     #print "mst list length:"
-#     #print len(mst)
-#     concDict=progressionSim.getProgressionSimilarityDict(geneModulesFinal,mst)
-#     #print "concdict:"
-#     #print concDict
-#     progMat=progressionSim.getProgressionSimilarityMatrix(geneModulesFinal,concDict)
-#     print ""
-#     print "progression matrix:"
-#     print np.array(progMat)
-#     print ""
-#     print "length of progression matrix:"
-#     print len(progMat)
     
 def cst(dataset):
     
@@ -301,7 +243,7 @@ def cst(dataset):
     dataset = stats.zscore(dataset)
     dataset = np.nan_to_num(dataset)
     
-    path,tcsr =cs.run_cst(dataset,"euclidean","average","CentroidPoints")
+    tcsr =cs.run_cst(dataset,"euclidean","average","CentroidPoints")
     
     graph=get_dict(tcsr)
     cst_edges=mop.graph.edges(graph)
@@ -370,16 +312,6 @@ def spd(dataset,param_dict):
     
     spd_edges=mop.graph.edges(graph)
     
-#     temp_list=[]
-#     for p in path:
-#         a,b=p
-#         if a not in temp_list:
-#             temp_list.append(int(a)) 
-#         if b not in temp_list:
-#             temp_list.append(int(b))
-#     
-#     dpath=temp_list
-    #branch,branchList=findBranch(graph, dpath)
     branch=1
     return dpath,spd_edges,label_dict,result_progMat,graph,branch,dlen
 

@@ -6,7 +6,7 @@ Created on 18-Dec-2017
 import os,ast
 import json
 import importlib
-from flask import Flask, session
+from flask import Flask, session, Blueprint
 from flask.templating import render_template
 from flask import request, redirect, url_for,flash,send_from_directory,send_file
 from werkzeug.utils import secure_filename
@@ -25,8 +25,8 @@ ALLOWED_EXTENSIONS = set(['txt','csv', 'fa','fas','fasta'])
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = config.UPLOAD_FOLDER
+app.config['SERVER_NAME']='localhost:9000'
 
-#app.config['FILE_NAME'] = FILE_NAME
 
 def allowed_file(filename):
     return '.' in filename and \

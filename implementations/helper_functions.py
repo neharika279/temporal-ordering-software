@@ -12,7 +12,6 @@ def get_path(i,j,predecessors):
         #print edge
         path.append(edge)
         current_node = next_node
-        
         next_node = predecessors[j,current_node]
     
     edge = (current_node,next_node)
