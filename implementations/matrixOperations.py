@@ -12,7 +12,7 @@ from scipy.sparse.csgraph import minimum_spanning_tree
 import graphFunctions as graph
 import random
 from scipy.spatial.distance import hamming
-from sklearn.metrics.pairwise import euclidean_distances
+from sklearn.metrics.pairwise import pairwise_distances
 from sklearn.manifold import MDS
 import sequence_distance as seq
 from sklearn.preprocessing import Imputer
@@ -265,6 +265,7 @@ def parseSequenceFile(filePath,distancetype,dimension_scaling_factor):
         print len(seqs)
        
         seq_distance_matrix=get_dist(seqs,distancetype)
+        
     
     embedding = MDS(n_components=dimension_scaling_factor,dissimilarity='precomputed')
     MDS_fix_matrix=embedding.fit_transform(seq_distance_matrix)
@@ -487,13 +488,27 @@ def seq_astype (seq, type=int, na=False, nastring="NA", navalue=-999):
 
     
 def getDistanceMatrix(dataset):
-#     Q = np.inner(dataset,dataset)
-#     diag = np.diagonal(Q)
-#    
-#     R = np.ones(Q.shape)*diag
-#    
-#     return np.sqrt(R+np.transpose(R) - 2*Q)
-    return euclidean_distances(dataset,dataset)
+    #Q = np.inner(dataset,dataset)
+    #diag = np.diagonal(Q)
+    
+    #R = np.ones(Q.shape)*diag
+    
+    #return np.sqrt(R+np.transpose(R) - 2*Q)
+    p_eud=pairwise_distances(dataset,metric='euclidean')
+    print "euclidean matrix"
+    
+    
+    f = open("temp_Euclidean.txt", "w")
+    
+    for row in p_eud:
+        for item in row:
+            f.write('%s' % item)
+            f.write("\t")
+        f.write("\n")
+    f.close()
+    
+    #print p_eud
+    return p_eud
 
 
 def getMST(V,W):

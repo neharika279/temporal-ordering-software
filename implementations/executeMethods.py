@@ -83,6 +83,16 @@ def executeBasicMST(alpha):
     dataset=np.array(alpha)
     
     distMat=get_distance_mat(alpha)
+    print "MST distMat:"
+    print distMat
+    
+    ############################REMOVE LATER###############################
+    distMat=chop(distMat)
+    print "MST chopped distMat:"
+    print distMat
+    
+    ########################################################################
+    
     resultGraph=mop.getMST(range(len(distMat)),distMat)
     #print "result graph:"
     #print resultGraph
@@ -94,6 +104,14 @@ def executeBasicMST(alpha):
     
     return diamPath,edges,resultGraph,branch,label_dict,diamLength
 
+def chop(num_arr):
+    
+    for i in range(len(num_arr)):
+        for j in range(len(num_arr)):
+            
+            if((float(num_arr[i][j])<(10**-3)) and i!=j):
+                num_arr[i][j]=1.5   
+    return num_arr
 
 def get_distance_mat(dataset):
     return mop.getDistanceMatrix(dataset)

@@ -9,6 +9,7 @@ import random
 from helper_functions import get_diameter_path
 import path
 import matrixOperations as mop
+import executeMethods as ex
 
 
 def run_spd(data,affinity,L,c1,p_thresh,mod_size_cutoff):
@@ -23,6 +24,16 @@ def run_spd(data,affinity,L,c1,p_thresh,mod_size_cutoff):
     for c in clusters:
         d = data[:,c]
         dists = pairwise_distances(d,metric=affinity)
+        
+        print "SPD distance matrix generated:"
+        print dists
+        
+        ###############################################REMOVE LATER###############################################
+        dists=ex.chop(dists)
+        print "SPD chopped distMAt:"
+        print dists
+        ##########################################################################################################
+        
         mst = minimum_spanning_tree(dists)
         msts.append(mst.todense())
         dist_mats.append(dists)
