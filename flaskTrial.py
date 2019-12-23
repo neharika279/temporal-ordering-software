@@ -25,7 +25,9 @@ ALLOWED_EXTENSIONS = set(['txt','csv', 'fa','fas','fasta'])
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = config.UPLOAD_FOLDER
-app.config['SERVER_NAME']='localhost:9000'
+#app.config['SERVER_NAME']='localhost:9000'
+
+url_extn=config.URL_EXTENSION
 
 
 def allowed_file(filename):
@@ -71,7 +73,7 @@ def home():
             session['filepath']=filePath
             file.save(filePath)
         
-            return redirect(url_for('exec_method_final',method=method_name))
+            return redirect(url_extn+url_for('exec_method_final',method=method_name))
     else:
         return render_template('home.html')
 
@@ -88,7 +90,7 @@ def visualize():
     session['filetype']='option1'
     session['method']='all'
     
-    return redirect(url_for('exec_method_final',method='all'))
+    return redirect(url_extn+url_for('exec_method_final',method='all'))
 
 @app.route("/citation")
 def citation():
