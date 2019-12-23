@@ -304,14 +304,20 @@ def getSerialization(method_name,param_dict,distance_type,dimension_factor):
     if(method_name=="mst"):
     
         dPath,edges,mst,branch,label_dict,dlen=ex.executeBasicMST(dataset)
+        print "MST:graph generated:"
+        print mst
     
     elif(method_name=="cst"):
         
         dPath,edges,label_dict,mst,branch,dlen=ex.cst(dataset)
+        print "CST:graph generated:"
+        print mst
         
     elif(method_name=="spd"):
         
         dPath,edges,label_dict,progMat,mst,branch,dlen=ex.spd(dataset,param_dict)
+        print "SPD:graph generated:"
+        print mst
         
      
     

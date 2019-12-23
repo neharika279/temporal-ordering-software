@@ -10,6 +10,7 @@ from scipy.cluster import hierarchy
 from helper_functions import get_diameter_path
 #import numpy.matlib
 from scipy.sparse import csr_matrix
+import executeMethods
 
 def run_cst(data,affinity,linkage,merge_method):
     
@@ -33,8 +34,15 @@ def merge_clusters(Z,data,affinity,merge_method):
     links = []
     adj_mat = np.zeros((len(data),len(data)))
     dist_mat = pairwise_distances(data,metric=affinity)
-    #print "distance matrix:"
-    #print dist_mat
+    print "distance matrix (CST):"
+    print dist_mat
+    
+    
+    ##########################################REMOVE LATER##################################
+    dist_mat=executeMethods.chop(dist_mat)
+    print "chopped CST dist_mat:"
+    print dist_mat
+    #########################################################################################
 
     # initialize leaf clusters
     for i,d in enumerate(data):
