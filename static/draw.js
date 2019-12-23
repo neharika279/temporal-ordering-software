@@ -1,6 +1,7 @@
 var globalNodelist=[];
 var globalEdges=[];
 var globalDPath=[];
+var url_extn=conf.url
 
 /************************************************MAIN REPRESENTATIONS**************************************/
 function treeView(orderedDivName,divName,checkBoxName){//(nodes,edges,dPath,labels){
@@ -177,7 +178,7 @@ function getPCAForOrder(order,pcaDivID,selected_distance,dimension_factor,pca_di
     post_data["pca_dimension_count"] = parseInt(pca_dimension_count);
     
     $.ajax({
-        url: '/pca',
+        url: url_extn+'/pca',
         data:JSON.stringify(post_data),
         type: 'POST',
         contentType:"text/json",  
@@ -577,7 +578,7 @@ function computePQFinal(paramDict,currentHiddenDiv,pqTextName,pqOrderDivName,ord
     post_data["dimension_factor"] = parseInt(selected_dimensionFactor);
 	
 	$.ajax({
-        url: '/computePQFinal',
+        url: url_extn+'/computePQFinal',
         data:JSON.stringify(post_data),
         type: 'POST',
         contentType:"text/json",  
@@ -603,7 +604,7 @@ function inPlaceAnalysis(order,distmatDiv,dimensionDiv,distMatCheckbox,selected_
     post_data["dimension_factor"] = parseInt(selected_dimensionFactor);
   
     $.ajax({
-        url: '/enteredOrdering',
+        url: url_extn+'/enteredOrdering',
         data:JSON.stringify(post_data),
         type: 'POST',
         contentType:"text/json",  
@@ -855,7 +856,7 @@ function drawTransposedMatrix(distDivID,tempOrder,checkbox){
     if(document.getElementById(checkbox).checked){
     	
     	 $.ajax({
-    	        url: '/getTransposedDistance',
+    	        url: url_extn+'/getTransposedDistance',
     	        data:JSON.stringify(post_data),
     	        type: 'POST',
     	        contentType:"text/json",  
@@ -872,7 +873,7 @@ function drawTransposedMatrix(distDivID,tempOrder,checkbox){
     }
     else{
     	$.ajax({
-	        url: '/get_only_distMat',
+	        url: url_extn+'/get_only_distMat',
 	        data:JSON.stringify(post_data),
 	        type: 'POST',
 	        contentType:"text/json",  
@@ -929,7 +930,7 @@ function getAnalysisFinal(ordering,graph,distmatDiv,dimensionDiv,backboneDiv,sel
     post_data["dimension_factor"] = parseInt(dimension_factor);
     
     $.ajax({
-        url: '/analyze_all_final',
+        url: url_extn+'/analyze_all_final',
         data:JSON.stringify(post_data),
         type: 'POST',
         contentType:"text/json",  
@@ -1019,7 +1020,7 @@ function computeResultsFinal(paramDict,methodName){
     post_data["dimension_factor"] = parseInt(dimension_factor);
     
     $.ajax({
-    	url: '/get_serialization_values',
+    	url: url_extn+'/get_serialization_values',
     	data:JSON.stringify(post_data),
     	type: 'POST',
     	contentType:"text/json",  
@@ -1045,7 +1046,7 @@ function recomputeResults(paramDict,methodName,divNum,selected_distanceType,sele
     post_data["dimension_factor"] = parseInt(selected_dimensionFactor);
     
     $.ajax({
-    	url: '/get_serialization_values',
+    	url: url_extn+'/get_serialization_values',
     	data:JSON.stringify(post_data),
     	type: 'POST',
     	contentType:"text/json",  
@@ -1162,7 +1163,7 @@ function populateUnorderedAnalysis(selected_distance,dimension_factor){
 	post_data["dimension_factor"] = parseInt(dimension_factor);
     
     $.ajax({
-    	url: '/get_unordered_analysis_data',
+    	url: url_extn+'/get_unordered_analysis_data',
     	data:JSON.stringify(post_data),
     	type: 'POST',
     	contentType:"text/json",  
@@ -1215,7 +1216,7 @@ function computeScree(){
 	post_data["distance_type"] = selected_distance;
 	
     $.ajax({
-    	url: '/get_scree_coordinates',
+    	url: url_extn+'/get_scree_coordinates',
     	data:JSON.stringify(post_data),
     	type: 'POST',
     	contentType:"text/json",  
