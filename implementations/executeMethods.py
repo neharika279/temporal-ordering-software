@@ -13,6 +13,23 @@ import json
 import graphFunctions as graph
 import numpy as np
 
+def get_node_pairs(graph):
+    
+    node_tuple_list=[]
+    for key in graph.keys():
+        valList=graph[key]
+        
+        for value in valList:
+            
+            if key in graph[value]:
+                node_tuple_list.append((key,value))
+    
+    temp_list=[]
+    for a,b in node_tuple_list:
+        if (a,b) not in temp_list and (b,a) not in temp_list:
+            temp_list.append((a,b))
+    
+    return set(temp_list)
 
 def get_nodes_and_edges(edges):
     

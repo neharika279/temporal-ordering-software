@@ -251,7 +251,12 @@ def writeResultToFile(response):
         
         methodValues_mst=response["mst"];
         f.write("mst method:\n")
-        f.write("graph created:"+str(methodValues_mst["graph"])+"\n")
+        f.write("graph created:"+"\n")
+        node_tuple_list_mst=ex.get_node_pairs(methodValues_mst["graph"])
+        
+        for node_tup in node_tuple_list_mst:
+            f.write(str(node_tup[0])+"-"+str(node_tup[1])+"\n")
+        
         f.write("diameter path ordering:"+str(methodValues_mst["dpath"])+"\n")
         f.write("diameter path length:"+str(methodValues_mst["dlen"])+"\n")
         f.write("noise percentage:"+str(methodValues_mst["noise"])+"\n")
@@ -260,14 +265,28 @@ def writeResultToFile(response):
         
         methodValues_cst=response["cst"];
         f.write("cst method:\n")
-        f.write("graph created:"+str(methodValues_cst["graph"])+"\n")
+        
+        f.write("graph created:"+"\n")
+        node_tuple_list_cst=ex.get_node_pairs(methodValues_cst["graph"])
+        
+        for node_tup in node_tuple_list_cst:
+            f.write(str(node_tup[0])+"-"+str(node_tup[1])+"\n")
+        
+        
         f.write("diameter path ordering:"+str(methodValues_cst["dpath"])+"\n")
         f.write("diameter path length:"+str(methodValues_cst["dlen"])+"\n")
         f.write("\n")
         
         methodValues_spd=response["spd"];
         f.write("spd method:\n")
-        f.write("graph created:"+str(methodValues_spd["graph"])+"\n")
+        
+        f.write("graph created:"+"\n")
+        node_tuple_list_spd=ex.get_node_pairs(methodValues_spd["graph"])
+        
+        for node_tup in node_tuple_list_spd:
+            f.write(str(node_tup[0])+"-"+str(node_tup[1])+"\n")
+        
+        
         f.write("diameter path ordering:"+str(methodValues_spd["dpath"])+"\n")
         f.write("diameter path length:"+str(methodValues_spd["dlen"])+"\n")
         f.write("\n")
