@@ -3,7 +3,7 @@ Created on 18-Dec-2017
 
 @author: Neharika Mazumdar
 '''
-import os,ast
+import os,ast,shutil
 import json
 import importlib
 from flask import Flask, session, Blueprint
@@ -53,27 +53,51 @@ def home():
         # check if the post request has the file part
         
         session['label']=request.form['labeloptions']
-        session['filetype']=request.form['options']
+        option=request.form['options']
+        session['filetype']=option
         method_name=request.form['methodoptions']
         session['method']=method_name
         
         if 'file' not in request.files:
             flash('No file part')
             return redirect(request.url)
-        file = request.files['file']
-        # if user does not select file, browser also
-        # submit a empty part without filename
-        if file.filename == '':
-            flash('No selected file')
-            return redirect(request.url)
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            session['filename']=filename
-            filePath=os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            session['filepath']=filePath
-            file.save(filePath)
         
-            return redirect(url_extn+url_for('exec_method_final',method=method_name))
+        
+        file_list=request.files.getlist('file')
+        
+        for item in file_list:
+            if item.filename == '':
+                flash('No selected file')
+                return redirect(request.url)
+        
+        if(option=='option4'):
+            
+            uploads_dir = os.path.join(app.config['UPLOAD_FOLDER'], 'hostfiles')
+            session['filepath']=uploads_dir
+            
+            if os.path.exists(uploads_dir) and os.path.isdir(uploads_dir):
+                shutil.rmtree(uploads_dir)
+            
+            os.makedirs(uploads_dir)
+            
+            for item in file_list: 
+                if item and allowed_file(item.filename):
+                    filename = secure_filename(item.filename)
+                    item.save(os.path.join(uploads_dir, filename))
+
+        
+        else:
+            data_file = file_list[0]
+            if data_file and allowed_file(data_file.filename):
+                filename = secure_filename(data_file.filename)
+                session['filename']=filename
+                filePath=os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                session['filepath']=filePath
+                data_file.save(filePath)
+        
+            
+        return redirect(url_extn+url_for('exec_method_final',method=method_name))
+    
     else:
         return render_template('home.html')
 
@@ -320,26 +344,19 @@ def getSerialization(method_name,param_dict,distance_type,dimension_factor):
      
     dataset=ex.readFromFile(filename, filetype, labeltype,distance_type,dimension_factor)
     
-    #dataset=preprocess(np.array(dataset))
 
     if(method_name=="mst"):
-    
         dPath,edges,mst,branch,label_dict,dlen=ex.executeBasicMST(dataset)
-        print "MST:graph generated:"
-        print mst
+        
     
     elif(method_name=="cst"):
         
         dPath,edges,label_dict,mst,branch,dlen=ex.cst(dataset)
-        print "CST:graph generated:"
-        print mst
+ 
         
     elif(method_name=="spd"):
         
         dPath,edges,label_dict,progMat,mst,branch,dlen=ex.spd(dataset,param_dict)
-        print "SPD:graph generated:"
-        print mst
-        
      
     
     dataset=np.array(dataset)
@@ -348,7 +365,7 @@ def getSerialization(method_name,param_dict,distance_type,dimension_factor):
     mst_graph={int(k):{int(i):float(j) for i,j in v.items()} for k,v in mst.items()}
     dPath=[int(i) for i in dPath]
     e,nodes=ex.get_nodes_and_edges(edges)
-    noise,intensity=ex.get_path_stats(mst)
+    noise,intensity=ex.get_path_stats(mst,dPath,dlen)
      
     for i in range(len(dataset)):
         temp_list=list(dataset[i])
@@ -357,7 +374,7 @@ def getSerialization(method_name,param_dict,distance_type,dimension_factor):
         
     return branch,mst_graph,progMat,labels_info,dPath,nodes,e,noise,intensity,dlen
 
- 
+
 def analyze_final(order,graph,distance_type,dimension_factor):
     
     result={}

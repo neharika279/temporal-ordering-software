@@ -6,6 +6,8 @@ Created on 30-Sep-2017
 from __future__ import division
 from Bio import SeqIO
 import sys,re,os
+from os import listdir
+from os.path import isfile,join
 import csv,copy
 import numpy as np
 from scipy.sparse.csgraph import minimum_spanning_tree
@@ -168,26 +170,26 @@ def getGraph():
 
 
 
-def get_classical_MDS_eigenvals(A,dimensions):
-    A = A**2
-
-    # centering matrix
-    n = A.shape[0]
-    J_c = 1./n*(np.eye(n) - 1 + (n-1)*np.eye(n))
-    
-    # perform double centering
-    B = -0.5*(J_c.dot(A)).dot(J_c)
-    
-    # find eigenvalues and eigenvectors
-    for i in range(dimensions):
-        eigen_val = np.linalg.eig(B)[i]
-       
-        eigen_vec = np.linalg.eig(B)[i].T
-        
-    
-    # select top 2 dimensions (for example)
-    PC1 = np.sqrt(eigen_val[0])*eigen_vec[0]
-    PC2 = np.sqrt(eigen_val[1])*eigen_vec[1]
+# def get_classical_MDS_eigenvals(A,dimensions):
+#     A = A**2
+# 
+#     # centering matrix
+#     n = A.shape[0]
+#     J_c = 1./n*(np.eye(n) - 1 + (n-1)*np.eye(n))
+#     
+#     # perform double centering
+#     B = -0.5*(J_c.dot(A)).dot(J_c)
+#     
+#     # find eigenvalues and eigenvectors
+#     for i in range(dimensions):
+#         eigen_val = np.linalg.eig(B)[i]
+#        
+#         eigen_vec = np.linalg.eig(B)[i].T
+#         
+#     
+#     # select top 2 dimensions (for example)
+#     PC1 = np.sqrt(eigen_val[0])*eigen_vec[0]
+#     PC2 = np.sqrt(eigen_val[1])*eigen_vec[1]
     
 
 
@@ -252,35 +254,118 @@ def compute_scree_coordinates(filename,distance_type):
         Y,eigenvals=cmdscale(seq_distance_matrix)
 
     return eigenvals,dimensions
+
+
+def calc_hausdorff_matrix(seqDict,onlyFiles):
+    
+    num_files=len(onlyFiles)
+    host_hausdorff_matrix=np.zeros([num_files,num_files],float) 
+    
+    for i in range(num_files):
+        for j in range(num_files):
+            
+            host1_seqs=seqDict[onlyFiles[i]]
+            host2_seqs=seqDict[onlyFiles[j]]
+    
+            h_dist1=hausdorff(host1_seqs, host2_seqs)
+            h_dist2=hausdorff(host2_seqs, host1_seqs)
+
+            host_hausdorff_matrix[i][j]=(h_dist1+h_dist2)/2.0
+            
+    
+    #print "hausdorff host matrix:"
+    #print host_hausdorff_matrix
+    return host_hausdorff_matrix
+
+def hausdorff(a,b):
+    
+    x_max=0.00
+    
+    for i in a:
+        for j in b:
+            #print i,j
+            diff=seq.Tamuradistance(str(i), str(j))#abs(i-j)
+            if diff>x_max:
+                x_max=diff
+                
+                a_element=i
+    
+   
+    
+    x_min=x_max+10
+    
+    for k in b:
+        min_diff=seq.Tamuradistance(str(a_element),str(k))#abs(a_element-k)
+        if min_diff<x_min:
+            x_min=min_diff
+            
+            b_element=k
+    
+            
+    
+    h_dist=seq.Tamuradistance(str(a_element), str(b_element))#abs(a_element-b_element)
+    #print 'h_dist:'
+    #print h_dist
+    return h_dist
+
     
 def parseSequenceFile(filePath,distancetype,dimension_scaling_factor):
     
-    if not filePath.endswith("fas") and not filePath.endswith('fasta') and not filePath.endswith('fa'):
-            #print(input)
-            sys.exit("Warning! The above file may not be in fasta format. Exiting")
-    else:
-        print filePath
-        seqs=parseInput(filePath,False)
-        print "number of seqs read::::"
-        print len(seqs)
-       
-        seq_distance_matrix=get_dist(seqs,distancetype)
+    if os.path.isdir(filePath):                                                                                 #found folder
+        #print "found folder"
+        
+        onlyfiles = [join(filePath, f) for f in listdir(filePath) if isfile(join(filePath, f))]
+        #print onlyfiles
+        
+        seqsDict={}
+        for input in onlyfiles:
+        
+            if not input.endswith("fas") and not input.endswith('fasta') and not input.endswith('fa'):
+                sys.exit("Warning! The above file may not be in fasta format. Exiting")
+            else:
+                seqsDict[input]=parseInput(input,False)
+        
+        #print seqsDict
+        
+        seq_distance_matrix=calc_hausdorff_matrix(seqsDict, onlyfiles)
+        
+        
+    else:                                                                                                           #found file
+        #print "found file"
+    
+        if not filePath.endswith("fas") and not filePath.endswith('fasta') and not filePath.endswith('fa'):
+                #print(input)
+                sys.exit("Warning! The above file may not be in fasta format. Exiting")
+        else:
+            print filePath
+            seqs=parseInput(filePath,False)
+            print "number of seqs read:"
+            print len(seqs)
+           
+            seq_distance_matrix=get_dist(seqs,distancetype)
         
     
-    embedding = MDS(n_components=dimension_scaling_factor,dissimilarity='precomputed')
-    MDS_fix_matrix=embedding.fit_transform(seq_distance_matrix)
+    #embedding = MDS(n_components=dimension_scaling_factor,dissimilarity='precomputed')
+    #MDS_fix_matrix=embedding.fit_transform(seq_distance_matrix)
+    
+    MDS_fix_matrix=MDSEmbedding(dimension_scaling_factor, seq_distance_matrix)
     
     
-    filePath=os.path.join(UPLOAD_FOLDER, "results.txt")
-    f_res = open(filePath, "a")
+    
+    resultFilePath=os.path.join(UPLOAD_FOLDER, "results.txt")
+    f_res = open(resultFilePath, "a")
     f_res.write("Genetic distance matrix for distance type "+distancetype+":\n")
     f_res.write(str(np.array(seq_distance_matrix))+"\n\n")
     f_res.write("MDS embedded co-ordinate points in "+str(dimension_scaling_factor)+"space:\n")
     f_res.write(str(np.array(MDS_fix_matrix))+"\n\n")
     f_res.close()
     
-    filePath=os.path.join(UPLOAD_FOLDER, "temp_MDS_file.txt")
-    f = open(filePath, "w")
+    MDSFilePath=os.path.join(UPLOAD_FOLDER, "temp_MDS_file.txt")
+    
+    if os.path.exists(MDSFilePath):
+        os.remove(MDSFilePath)
+        
+    f = open(MDSFilePath, "w")
     
     for row in MDS_fix_matrix:
         for item in row:
@@ -289,11 +374,17 @@ def parseSequenceFile(filePath,distancetype,dimension_scaling_factor):
         f.write("\n")
     f.close()
     
-    alpha = tableasrows(filePath,"\t", autoconvert=True, hasrownames=False)
+    alpha = tableasrows(MDSFilePath,"\t", autoconvert=True, hasrownames=False)
     
     return alpha
         
-        
+def MDSEmbedding(dimension_factor,distance_matrix):
+    embedding = MDS(n_components=dimension_factor,dissimilarity='precomputed',metric=True,random_state=42)
+    MDS_fix_matrix=embedding.fit_transform(distance_matrix)
+    
+    return MDS_fix_matrix
+
+       
 def parseInput(input_file,freq): #get sequences from a file
     if not freq:
         seqs=[]    
@@ -488,24 +579,18 @@ def seq_astype (seq, type=int, na=False, nastring="NA", navalue=-999):
 
     
 def getDistanceMatrix(dataset):
-    #Q = np.inner(dataset,dataset)
-    #diag = np.diagonal(Q)
+    Q = np.inner(dataset,dataset)
+    diag = np.diagonal(Q)
+     
+    R = np.ones(Q.shape)*diag
+     
+    #p_eud=np.sqrt(R+np.transpose(R) - 2*Q)
     
-    #R = np.ones(Q.shape)*diag
-    
-    #return np.sqrt(R+np.transpose(R) - 2*Q)
     p_eud=pairwise_distances(dataset,metric='euclidean')
-    print "euclidean matrix"
+    #print "euclidean matrix"
     
-    
-    f = open("temp_Euclidean.txt", "w")
-    
-    for row in p_eud:
-        for item in row:
-            f.write('%s' % item)
-            f.write("\t")
-        f.write("\n")
-    f.close()
+    #print "p_eud len:"
+    #print len(p_eud)
     
     #print p_eud
     return p_eud
@@ -564,6 +649,8 @@ def getDiameterPath(G, first = None):
 
     The tree should be represented in the dictionary of dictionaries format.
     """
+    #print "graph:"
+    #print G
     if first is None:
         first = random.choice(G.keys())
     
@@ -583,7 +670,6 @@ def getDiameterPath(G, first = None):
 
 
 def Dijkstra(graph, start, end=None):
-   
 
     D = {}    # dictionary of final distances
     P = {}    # dictionary of predecessors
@@ -857,7 +943,7 @@ def calc_noise_ratio(graph,branch_list):
     return float(round(((branch_points/MST_points)*100),2))
 
 
-def calc_sampling_intesity_ratio(graph,diamPath):
+def calc_sampling_intesity_ratio(graph,diamLen):
     
     total_path_len=0
     path_num=0
@@ -872,9 +958,9 @@ def calc_sampling_intesity_ratio(graph,diamPath):
     
    
     print "diamPath[1]::::"
-    print diamPath[1]
+    print diamLen
     avg_path_len=round(total_path_len/path_num,2)
-    intensity_ratio=round(avg_path_len/diamPath[1],2)
+    intensity_ratio=round(avg_path_len/diamLen,2)
     return intensity_ratio
     
 
