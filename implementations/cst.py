@@ -10,11 +10,22 @@ from scipy.cluster import hierarchy
 from helper_functions import get_diameter_path
 #import numpy.matlib
 from scipy.sparse import csr_matrix
-import executeMethods
+import executeMethods as ex
+import matplotlib.pyplot as plt
+import numpy.matlib
 
 def run_cst(data,affinity,linkage,merge_method):
-    
+    print "cst: run_cst() linkage mtd:",linkage
     Z = hierarchy.linkage(data, linkage)
+    
+    ########################################################################
+#     label_list=['CCNE1','E2F1','CDC6','PCNA','RFC4','DHFR','RRM2','RAD51','CDC2','TOP2A','CCNF','CCNA2','STK15','BUB1','CCNB1','PLK1','PTTG1','RAD21','VEGFC','CDKN3']
+#     
+#     fig = plt.figure(figsize=(25, 10))
+#     dn = hierarchy.dendrogram(Z,orientation='left',labels=label_list)
+#     plt.show()
+    
+    ##########################################################################
     
     Tcsr = merge_clusters(Z,data,affinity,merge_method)
     
@@ -33,26 +44,26 @@ def merge_clusters(Z,data,affinity,merge_method):
     nodes = []
     links = []
     adj_mat = np.zeros((len(data),len(data)))
-    dist_mat = pairwise_distances(data,metric=affinity)
-    print "distance matrix (CST):"
-    print dist_mat
+    dist_mat = ex.get_distance_mat(data)#pairwise_distances(data,metric=affinity)
+    #print "distance matrix (CST):"
+    #print dist_mat
     
     
     ##########################################REMOVE LATER##################################
-    dist_mat=executeMethods.chop(dist_mat)
-    print "chopped CST dist_mat:"
-    print dist_mat
+    #dist_mat=executeMethods.chop(dist_mat)
+    #print "chopped CST dist_mat:"
+    #print dist_mat
     #########################################################################################
 
     # initialize leaf clusters
     for i,d in enumerate(data):
-        nodes.append([i])
-        
+        nodes.append([i])    
     
     for c1,c2,d,size in Z:
         #print 
         c1 = nodes[int(c1)]
         c2 = nodes[int(c2)]
+        
         
         link = get_linkage(c1,c2,data,affinity,method=merge_method)    
         #print "output of linkage:"
@@ -81,6 +92,7 @@ def get_linkage(c1,c2,data,affinity,method,lambda_val=.01):
     
 
 def nearest_neighbors_linkage(c1,c2,data,affinity):
+    
     c1_points = data[c1,:]
     c2_points = data[c2,:]
     dists = pairwise_distances(c1_points,Y=c2_points,metric=affinity)
@@ -124,8 +136,8 @@ def weighted_centroids_linkage(c1,c2,data,affinity,lambda_val):
     centroid_dists1 = pairwise_distances(c1_points,Y=centroid_2,metric=affinity)
     centroid_dists2 = pairwise_distances(c2_points,Y=centroid_1,metric=affinity)
     
-    cent_dists1 = np.repmat(centroid_dists1, 1, len(c2)) * lambda_val
-    cent_dists2 = np.repmat(centroid_dists2, 1, len(c1)).T * lambda_val
+    cent_dists1 = numpy.matlib.repmat(centroid_dists1, 1, len(c2)) * lambda_val
+    cent_dists2 = numpy.matlib.repmat(centroid_dists2, 1, len(c1)).T * lambda_val
     
     dists = pairwise_distances(c1_points,Y=c2_points,metric=affinity)
     dists = dists + cent_dists1 + cent_dists2

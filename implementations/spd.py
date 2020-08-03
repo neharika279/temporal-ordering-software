@@ -23,15 +23,15 @@ def run_spd(data,affinity,L,c1,p_thresh,mod_size_cutoff):
     dist_mats = []    
     for c in clusters:
         d = data[:,c]
-        dists = pairwise_distances(d,metric=affinity)
+        dists = ex.get_distance_mat(d) #pairwise_distances(d,metric=affinity)
         
-        print "SPD distance matrix generated:"
-        print dists
+        #print "SPD distance matrix generated:"
+        #print dists
         
         ###############################################REMOVE LATER###############################################
-        dists=ex.chop(dists)
-        print "SPD chopped distMAt:"
-        print dists
+        #dists=ex.chop(dists)
+        #print "SPD chopped distMAt:"
+        #print dists
         ##########################################################################################################
         
         mst = minimum_spanning_tree(dists)
@@ -65,7 +65,7 @@ def run_spd(data,affinity,L,c1,p_thresh,mod_size_cutoff):
     #print "dict of dict mst:"
     #print graph_dict_mst
     
-    diamPath,diamLength=mop.getDiameterPath(graph_dict_mst,0)
+    diamPath,diamLength=mop.getDiameterPath(graph_dict_mst)
     #print "diam path by basic mst method:"
     #print diamPath
 

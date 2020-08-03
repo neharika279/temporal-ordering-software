@@ -90,7 +90,9 @@ def get_complete_ordering(dPath,mst):
     return ordering   
 
 def executeBasicMST(alpha):
-
+    
+    
+    
     if(alpha.rownames!=None):
         
         label_dict=get_label_dict(alpha.rownames)
@@ -100,20 +102,30 @@ def executeBasicMST(alpha):
     dataset=np.array(alpha)
     
     distMat=get_distance_mat(alpha)
-    print "MST distMat:"
-    print distMat
+    
+    f = open("temp_Euclidean.txt", "w")
+    
+    for row in distMat:
+        for item in row:
+            f.write('%s' % item)
+            f.write("\t")
+        f.write("\n")
+    f.close()
+    
+    #print "MST distMat:"
+    #print distMat
     
     ############################REMOVE LATER###############################
-    distMat=chop(distMat)
-    print "MST chopped distMat:"
-    print distMat
+    #distMat=chop(distMat)
+    #print "MST chopped distMat:"
+    #print distMat
     
     ########################################################################
     
     resultGraph=mop.getMST(range(len(distMat)),distMat)
     #print "result graph:"
     #print resultGraph
-    diamPath,diamLength=mop.getDiameterPath(resultGraph,0)
+    diamPath,diamLength=mop.getDiameterPath(resultGraph)
     
     edges=mop.graph.edges(resultGraph)
     
@@ -192,6 +204,9 @@ def readFromFile(filePath,filetype,labeltype,distancetype,dimension_scaling_fact
     elif(filetype=='option3'):
         alpha=mop.parseSequenceFile(filePath,distancetype,dimension_scaling_factor)
        
+    elif(filetype=='option4'):
+        alpha=mop.parseSequenceFile(filePath,distancetype,dimension_scaling_factor)
+    
     else:
         return -1
     return alpha
@@ -208,19 +223,19 @@ def readFromFileSequenceData(filePath,distancetype,dimension_scaling_factor):
  
  
  
-def get_path_stats(resultGraph):
+def get_path_stats(resultGraph,diamPath,diamLength):
     
     noise_to_signal_ratio=0
     intensity_ratio=0
     #alpha=readFromFile(filepath, filetype)
     
-    diamPath,diamLength=mop.getDiameterPath(resultGraph,0)
+    #diamPath,diamLength=mop.getDiameterPath(resultGraph)
 
     branch,branchList=findBranch(resultGraph, diamPath)
     
     if branch==1:
         noise_to_signal_ratio=mop.calc_noise_ratio(resultGraph, branchList)
-        intensity_ratio=mop.calc_sampling_intesity_ratio(resultGraph, diamPath)
+        intensity_ratio=mop.calc_sampling_intesity_ratio(resultGraph, diamLength)
 
             
     return noise_to_signal_ratio,intensity_ratio  
@@ -278,13 +293,13 @@ def cst(dataset):
     dataset = stats.zscore(dataset)
     dataset = np.nan_to_num(dataset)
     
-    tcsr =cs.run_cst(dataset,"euclidean","average","CentroidPoints")
+    tcsr =cs.run_cst(dataset,"euclidean","weighted","WeightedCentroids")
     
     graph=get_dict(tcsr)
     cst_edges=mop.graph.edges(graph)
     
     
-    dpath,dlen=mop.getDiameterPath(graph,0)
+    dpath,dlen=mop.getDiameterPath(graph)
 #     temp_list=[]
 #     for p in path:
 #         a,b=p
