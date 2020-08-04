@@ -100,8 +100,12 @@ def executeBasicMST(alpha):
         label_dict={}
         
     dataset=np.array(alpha)
+   # print "MST dataset::"
+   # print str(dataset)
     
     distMat=get_distance_mat(alpha)
+   # print "MST dist_mat::"
+   # print str(distMat)
     
     f = open("temp_Euclidean.txt", "w")
     
@@ -293,7 +297,7 @@ def cst(dataset):
     dataset = stats.zscore(dataset)
     dataset = np.nan_to_num(dataset)
     
-    tcsr =cs.run_cst(dataset,"euclidean","weighted","WeightedCentroids")
+    tcsr =cs.run_cst(dataset,"euclidean","weighted","NearestNeighbors")
     
     graph=get_dict(tcsr)
     cst_edges=mop.graph.edges(graph)

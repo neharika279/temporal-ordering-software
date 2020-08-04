@@ -2,15 +2,15 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1"> 
-<script type="text/javascript" src="{{url_for('static',filename='config.js')}}"></script>
-<script type="text/javascript" src="{{url_for('static',filename='vis.min.js')}}"></script>
+<script type="text/javascript" src="/temporal{{url_for('static',filename='config.js')}}"></script>
+<script type="text/javascript" src="/temporal{{url_for('static',filename='vis.min.js')}}"></script>
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
 <script src="http://code.highcharts.com/highcharts.js"></script>
-<link href="{{ url_for('static', filename='vis.min.css') }}" rel="stylesheet" type="text/css" />
+<link href="/temporal{{ url_for('static', filename='vis.min.css') }}" rel="stylesheet" type="text/css" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.6.0/Chart.min.js"></script>
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-<script type="text/javascript" src="{{url_for('static',filename='draw.js')}}"></script>
-<script type="text/javascript" src="{{url_for('static',filename='jquery.js')}}"></script>
+<script type="text/javascript" src="/temporal{{url_for('static',filename='draw.js')}}"></script>
+<script type="text/javascript" src="/temporal{{url_for('static',filename='jquery.js')}}"></script>
 </head>
 <body>
 	

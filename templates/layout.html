@@ -2,7 +2,7 @@
 <html>
 	<head>
     	<title>Flask app</title>
-    	<link rel="stylesheet" type= "text/css" href="{{ url_for('static', filename='css/main.css') }}">
+    	<link rel="stylesheet" type= "text/css" href="/temporal{{ url_for('static', filename='css/main.css') }}">
   	</head>
   <body>
     <header>
@@ -10,15 +10,15 @@
         <h1 class="logo"><span>Temporal Ordering Algorithms for Biological Samples</span></h1>
    		
    		  <ul class="menu">
-            <li><span><a href="{{ url_for('help') }}" target="_blank">Help and Tutorial</a></span></li>
+            <li><span><a href="/temporal{{ url_for('help') }}" target="_blank">Help and Tutorial</a></span></li>
           </ul>
           
           <ul class="menu">
-            <li><span><a href="{{ url_for('citation') }}" target="_blank">Citation</a></span></li>
+            <li><span><a href="/temporal{{ url_for('citation') }}" target="_blank">Citation</a></span></li>
           </ul>
           
           <ul class="menu">
-            <li><span><a href="{{ url_for('home') }}">Home</a></span></li>
+            <li><span><a href="/temporal{{ url_for('home') }}">Home</a></span></li>
           </ul>
           
       </div>

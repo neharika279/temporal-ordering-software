@@ -303,9 +303,10 @@ def hausdorff(a,b):
     
             
     
+    #print "a_element:",a_element
+    #print "b_element:",b_element
     h_dist=seq.Tamuradistance(str(a_element), str(b_element))#abs(a_element-b_element)
-    #print 'h_dist:'
-    #print h_dist
+    #print 'h_dist:',h_dist
     return h_dist
 
     
@@ -328,6 +329,8 @@ def parseSequenceFile(filePath,distancetype,dimension_scaling_factor):
         #print seqsDict
         
         seq_distance_matrix=calc_hausdorff_matrix(seqsDict, onlyfiles)
+        #print "seq_distance_matrix::"
+        #print str(seq_distance_matrix)
         
         
     else:                                                                                                           #found file
@@ -343,6 +346,8 @@ def parseSequenceFile(filePath,distancetype,dimension_scaling_factor):
             print len(seqs)
            
             seq_distance_matrix=get_dist(seqs,distancetype)
+            #print "seq_distance_matrix::"
+            #print str(seq_distance_matrix)
         
     
     #embedding = MDS(n_components=dimension_scaling_factor,dissimilarity='precomputed')
